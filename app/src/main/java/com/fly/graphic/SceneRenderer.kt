@@ -151,13 +151,42 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
 
     override fun DrawObject(canvas: Canvas, obj: Object, width: Int, height: Int, index: Int)
     {
+        obj_last_x = obj.x
+        obj_last_y = obj.y
         obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
-        if (obj.GetCollisionBox() != null)
+        if (obj.GetRigid() != null && FPS != null)
         {
-            obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
-            if (obj.GetRigid() != null && FPS != null && !obj.GetCollisionBox()!!.Collision())
+            if (obj.GetCollisionBox() != null)
+            {
+                obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
+                if (!obj.GetCollisionBox()!!.Collision())
+                {
+                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                    obj.GetCollisionBox()!!.SetRect(RectF(obj.x,will_y,obj.x + width,will_y + height))
+                    if (obj.GetCollisionBox()!!.Collision())
+                    {
+                        if (will_y > obj.GetCollisionBox()!!.GetCollisionRect().top)
+                            obj.y = obj.GetCollisionBox()!!.GetCollisionRect().top
+                    }
+                    else
+                    {
+                        obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
+                        for (i in 0 until obj.GetCollisionBox()!!.GetAllCollisionRect().size)
+                        {
+                            if (obj.y > obj.GetCollisionBox()!!.GetAllCollisionRect()[i].bottom && obj_last_y!! + height < obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top)
+                            {
+                                obj.y = obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top
+                                return
+                            }
+                        }
+                        obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                    }
+                }
+            }
+            else
                 obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
         }
+
     }
 
 }

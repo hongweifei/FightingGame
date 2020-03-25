@@ -13,9 +13,6 @@ val WayRight = 1
 
 class Player(path: String,asset_manager: AssetManager) : Object()
 {
-    var width : Int = 0
-    var height : Int = 0
-
     var speed = 5
 
     var way = WayRight
@@ -38,20 +35,27 @@ class Player(path: String,asset_manager: AssetManager) : Object()
 
     init
     {
-        super.SetSprite(path,asset_manager)
+        super.SetSprite(path,asset_manager,true,false)
+    }
+
+    fun SetRun(way:Int,asset_manager: AssetManager)
+    {
+        this.way = way
+        run = way
+
+        if (way == WayLeft)
+            SetSprite("player/Kakashi_Left.png",asset_manager,false,true)
+        else if (way == WayRight)
+            SetSprite("player/Kakashi_Right.png",asset_manager,false,true)
     }
 
     fun Run()
     {
         Log.e("Run","奔跑")
         if (way == WayLeft)
-        {
             x -= speed
-        }
         if (way == WayRight)
-        {
             x += speed
-        }
     }
 
     fun Jump()

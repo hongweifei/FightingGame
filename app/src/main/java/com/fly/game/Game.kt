@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import com.fly.graphic.Camera
+import com.fly.graphic.Object
 import com.fly.graphic.SceneRenderer
 import com.fly.mygame.R
 import com.fly.physics.CollisionBox
@@ -63,23 +64,37 @@ class Game : Activity() , View.OnTouchListener
 
     fun InitGame()
     {
+        val wall = Object()
+        wall.SetSprite("UI/RockerBackGround.png",assets)
+        wall.width = width
+        wall.height = height/5
+        wall.y = (height - wall.height).toFloat()
+        wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y,wall.x + wall.width,wall.y + wall.height)))
+
         player = Player("player/Kakashi_Right.png",assets)
         player.width = this.width / 10
         player.height = this.height / 8
         //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,1f))
+        player.SetRigidBody(RigidBody(0f,2f))
         player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
-        player.AddCollide(RectF(0f,500f,1280f,500f))
+        player.AddCollide(wall)
         player.InitSpriteSrcRect(0,0,80,80,10,7)
 
+        //renderer.SetShader()
         renderer.SetDisplay { canvas: Canvas, FPS: Long? ->
-            player.Render(canvas,renderer,player.width,player.height,0)
+            wall.Render(canvas,renderer)
+            if (player.way == WayLeft)
+                player.Render(canvas,renderer,player.width,player.height,9)
+            else if(player.way == WayRight)
+                player.Render(canvas,renderer,player.width,player.height,0)
             if (player.jump)
                 player.Jump()
             if (player.run != None)
                 player.Run()
             if (player.drop)
                 player.Drop()
+
+            textView.text = FPS.toString()
         }
 
         scene.SetSceneRenderer(renderer)
@@ -103,8 +118,8 @@ class Game : Activity() , View.OnTouchListener
                 val dx = it.rawX - touch_x
                 val dy = it.rawY - touch_y
 
-                camera.look_at_x += dx / 100
-                camera.look_at_y += dy / 100
+                camera.look_at_x += dx / 90
+                camera.look_at_y += dy / 90
 
                 Log.e("ViewMove","X:" + camera.look_at_x + "Y:" + camera.look_at_y)
             }
@@ -130,22 +145,22 @@ class Game : Activity() , View.OnTouchListener
         val button_11:ImageButton = ImageButton("UI/RockerButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
         val button_12:ImageButton = ImageButton("UI/RockerButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
 
-        button_1.SetAlpha(0x40)
-        button_2.SetAlpha(0x40)
-        button_3.SetAlpha(0x40)
-        button_4.SetAlpha(0x40)
-        button_5.SetAlpha(0x40)
-        button_6.SetAlpha(0x40)
-        button_7.SetAlpha(0x40)
-        button_8.SetAlpha(0x40)
-        button_9.SetAlpha(0x40)
-        button_10.SetAlpha(0x40)
-        button_11.SetAlpha(0x40)
-        button_12.SetAlpha(0x40)
+        button_1.SetAlpha(40)
+        button_2.SetAlpha(40)
+        button_3.SetAlpha(40)
+        button_4.SetAlpha(40)
+        button_5.SetAlpha(40)
+        button_6.SetAlpha(40)
+        button_7.SetAlpha(40)
+        button_8.SetAlpha(40)
+        button_9.SetAlpha(40)
+        button_10.SetAlpha(40)
+        button_11.SetAlpha(40)
+        button_12.SetAlpha(40)
 
         skill_button.SetClick { player.Skill(this) }
-        button_1.SetClick { player.skill_button_1 = true }
-        button_2.SetClick { player.skill_button_2 = true }
+        button_1.SetClick { player.skill_button_1 = true;button_1.SetAlpha(255) }
+        button_2.SetClick { player.skill_button_2 = true;button_2.SetAlpha(255) }
         button_3.SetClick { player.skill_button_3 = true }
         button_4.SetClick { player.skill_button_4 = true }
         button_5.SetClick { player.skill_button_5 = true }
@@ -182,8 +197,8 @@ class Game : Activity() , View.OnTouchListener
             when (v?.id)
             {
                 R.id.JumpButton -> player.jump = true
-                R.id.LeftButton -> player.run = WayLeft
-                R.id.RightButton -> player.run = WayRight
+                R.id.LeftButton -> player.SetRun(WayLeft,assets)
+                R.id.RightButton -> player.SetRun(WayRight,assets)
             }
         }
         if (event?.action == MotionEvent.ACTION_UP)

@@ -10,17 +10,19 @@ import com.fly.graphic.Renderer
 
 class UIView(context : Context?,attrs: AttributeSet?) : View(context,attrs)
 {
-    private var widget_list:ArrayList<Widget> = ArrayList()
     private var click:(event: MotionEvent?)->Unit = {}
     private var up:(event: MotionEvent?)->Unit = {}
     private var move:(event: MotionEvent?)->Unit = {}
 
+    private var widget_list:ArrayList<Widget> = ArrayList()
+
+    private var renderer:Renderer = Renderer()
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?)
     {
         for (i in 0 until widget_list.size)
         {
-            if (canvas != null) { widget_list[i].Render(canvas, Renderer()) }
+            if (canvas != null) { widget_list[i].Render(canvas, renderer) }
         }
 
         super.onDraw(canvas)
@@ -57,6 +59,8 @@ class UIView(context : Context?,attrs: AttributeSet?) : View(context,attrs)
     fun SetClick(click:(event: MotionEvent?)->Unit){ this.click = click }
     fun SetUp(up:(event: MotionEvent?)->Unit){ this.up = up }
     fun SetMove(move:(event: MotionEvent?)->Unit){ this.move = move }
+
+    fun SetRenderer(r:Renderer) { renderer = r }
 
     fun AddWidget(widget:Widget) { widget_list.add(widget) }
     fun AddWidgets(widgets: ArrayList<Widget>) { widget_list.addAll(widgets) }

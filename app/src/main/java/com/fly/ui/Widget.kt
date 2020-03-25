@@ -5,7 +5,7 @@ import com.fly.graphic.Renderer
 
 open class Widget(var x:Int = 0,var y:Int = 0,var width:Int = 0,var height:Int = 0)
 {
-    protected var alpha:Int? = null
+    protected var alpha:Int = 255
 
     private var click : () -> Unit = {}
     var is_click = false

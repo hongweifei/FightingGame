@@ -3,7 +3,7 @@ package com.fly.graphic
 
 import android.content.res.AssetManager
 import android.graphics.*
-import android.util.Log
+import android.graphics.drawable.ShapeDrawable
 import android.view.View.LAYER_TYPE_HARDWARE
 import android.view.View.LAYER_TYPE_SOFTWARE
 
@@ -15,6 +15,9 @@ open class Renderer()
     private var layer_type = LAYER_TYPE_HARDWARE
 
     protected var FPS:Long? = null
+
+    protected var obj_last_x:Float? = null
+    protected var obj_last_y:Float? = null
 
     init
     {
@@ -39,7 +42,7 @@ open class Renderer()
     fun SetColor(color:Int) { paint.setColor(color) }
     fun SetAlpha(a:Int) { paint.alpha = a }//设置透明程度
     fun SetStyle(style:Paint.Style) { paint.style = style }
-    fun SetShader(shader:Shader) { paint.setShader(shader) }
+    fun SetShader(shader: Shader) { paint.setShader(shader) }
     fun SetShadowLayer(radius:Float,dx:Float,dy:Float,shadow_color:Int) { paint.setShadowLayer(radius,dx,dy,shadow_color);layer_type = LAYER_TYPE_SOFTWARE }
 
     fun GetHeight(canvas: Canvas) : Int { return canvas.height }
@@ -129,13 +132,41 @@ open class Renderer()
         sprite.GetBitmap()?.let { canvas.drawBitmap(it,matrix,paint) }
     }
 
-    open fun DrawObject(canvas: Canvas, obj: Object, width: Int = obj.GetSprite()?.width!!, height: Int = obj.GetSprite()?.height!!, index: Int = 0)
+    open fun DrawObject(canvas: Canvas, obj: Object, width: Int = obj.width, height: Int = obj.height, index: Int = 0)
     {
+        obj_last_x = obj.x
+        obj_last_y = obj.y
         obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
-        if (obj.GetCollisionBox() != null)
+        if (obj.GetRigid() != null && FPS != null)
         {
-            obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
-            if (obj.GetRigid() != null && FPS != null && !obj.GetCollisionBox()!!.Collision())
+            if (obj.GetCollisionBox() != null)
+            {
+                obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
+                if (!obj.GetCollisionBox()!!.Collision())
+                {
+                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                    obj.GetCollisionBox()!!.SetRect(RectF(obj.x,will_y,obj.x + width,will_y + height))
+                    if (obj.GetCollisionBox()!!.Collision())
+                    {
+                        if (will_y > obj.GetCollisionBox()!!.GetCollisionRect().top)
+                            obj.y = obj.GetCollisionBox()!!.GetCollisionRect().top
+                    }
+                    else
+                    {
+                        obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
+                        for (i in 0 until obj.GetCollisionBox()!!.GetAllCollisionRect().size)
+                        {
+                            if (obj.y > obj.GetCollisionBox()!!.GetAllCollisionRect()[i].bottom && obj_last_y!! + height < obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top)
+                            {
+                                obj.y = obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top
+                                return
+                            }
+                        }
+                        obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                    }
+                }
+            }
+            else
                 obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
         }
     }

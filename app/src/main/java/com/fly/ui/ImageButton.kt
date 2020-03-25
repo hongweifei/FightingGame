@@ -21,20 +21,17 @@ class ImageButton(path:String?,asset_manager:AssetManager?,x:Int = 0, y:Int = 0,
 
     override fun Render(canvas: Canvas, renderer: Renderer)
     {
-        val r:Renderer = renderer
-        alpha?.let { r.SetAlpha(it) }
-        r.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
+        renderer.SetAlpha(alpha)
+        renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
     }
     override fun Render(canvas: Canvas, renderer: Renderer, x: Int, y: Int)
     {
-        val r:Renderer = renderer
-        alpha?.let { r.SetAlpha(it) }
+        renderer.SetAlpha(alpha)
         renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
     }
     override fun Render(canvas: Canvas, renderer: Renderer, x: Int, y: Int, width: Int, height: Int)
     {
-        val r:Renderer = renderer
-        alpha?.let { r.SetAlpha(it) }
+        renderer.SetAlpha(alpha)
         renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
     }
 }

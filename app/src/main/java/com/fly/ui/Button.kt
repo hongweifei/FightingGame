@@ -21,7 +21,7 @@ open class Button(var text:String = "Button", x:Int = 0, y:Int = 0, width:Int = 
     {
         val r:Renderer = renderer
 
-        alpha?.let { r.SetAlpha(it) }
+        r.SetAlpha(alpha)
         r.DrawText(canvas,text,x.toFloat(),y.toFloat() + height / 2);
         r.SetStyle(Paint.Style.STROKE)
         r.DrawRect(canvas,x,y,width,height)
@@ -29,14 +29,18 @@ open class Button(var text:String = "Button", x:Int = 0, y:Int = 0, width:Int = 
     override fun Render(canvas: Canvas,renderer: Renderer,x: Int,y: Int)
     {
         val r:Renderer = renderer
-        alpha?.let { r.SetAlpha(it) }
+        r.SetAlpha(alpha)
         r.DrawText(canvas,text,x.toFloat(),y.toFloat());renderer.DrawRect(canvas,x,y,width,height)
+        r.SetStyle(Paint.Style.STROKE)
+        r.DrawRect(canvas,x,y,width,height)
     }
     override fun Render(canvas: Canvas,renderer: Renderer,x:Int,y:Int,width:Int,height:Int)
     {
         val r:Renderer = renderer
-        alpha?.let { r.SetAlpha(it) }
+        r.SetAlpha(alpha)
         r.DrawText(canvas,text,x.toFloat(),y.toFloat());renderer.DrawRect(canvas,x,y,width,height)
+        r.SetStyle(Paint.Style.STROKE)
+        r.DrawRect(canvas,x,y,width,height)
     }
 
 }
