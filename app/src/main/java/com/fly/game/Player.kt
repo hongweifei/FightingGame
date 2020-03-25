@@ -2,6 +2,7 @@ package com.fly.game
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.RectF
 import android.util.Log
 import android.widget.Toast
 import com.fly.graphic.Object
@@ -17,8 +18,10 @@ class Player(path: String,asset_manager: AssetManager) : Object()
 
     var speed = 5
 
+    var way = WayRight
     var run = None
     var jump = false
+    var drop = true
 
     var skill_button_1 = false
     var skill_button_2 = false
@@ -38,14 +41,14 @@ class Player(path: String,asset_manager: AssetManager) : Object()
         super.SetSprite(path,asset_manager)
     }
 
-    fun Run(way:Int)
+    fun Run()
     {
         Log.e("Run","奔跑")
         if (way == WayLeft)
         {
             x -= speed
         }
-        else if (way == WayRight)
+        if (way == WayRight)
         {
             x += speed
         }
@@ -75,5 +78,13 @@ class Player(path: String,asset_manager: AssetManager) : Object()
         skill_button_10 = false
         skill_button_11 = false
         skill_button_12 = false
+    }
+
+    fun Drop()
+    {
+        if (collision_box!= null && collision_box!!.Collision())
+        {
+            drop = false
+        }
     }
 }

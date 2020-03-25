@@ -4,14 +4,18 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.graphics.Canvas
+import android.graphics.RectF
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import com.fly.graphic.Camera
-import com.fly.graphic.Renderer
+import com.fly.graphic.SceneRenderer
 import com.fly.mygame.R
+import com.fly.physics.CollisionBox
 import com.fly.physics.RigidBody
 import com.fly.ui.ImageButton
 import kotlinx.android.synthetic.main.game.*
@@ -19,11 +23,14 @@ import kotlinx.android.synthetic.main.game.*
 
 class Game : Activity() , View.OnTouchListener
 {
-    var renderer : Renderer = Renderer()
-    var camera: Camera = Camera(50f,100f)
+    var camera: Camera = Camera(0f,0f)
+    var renderer : SceneRenderer = SceneRenderer(camera)
 
     var width:Int = 0
     var height:Int = 0
+
+    var touch_x:Float = 0f
+    var touch_y:Float = 0f
 
     lateinit var player:Player
 
@@ -57,22 +64,26 @@ class Game : Activity() , View.OnTouchListener
     fun InitGame()
     {
         player = Player("player/Kakashi_Right.png",assets)
-        //player.SetSprite()
-        player.SetRigidBody(RigidBody())
-        player.InitSpriteSrcRect(0,0,80,80,10,7)
         player.width = this.width / 10
         player.height = this.height / 8
+        //player.SetSprite()
+        player.SetRigidBody(RigidBody(0f,1f))
+        player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
+        player.AddCollide(RectF(0f,500f,1280f,500f))
+        player.InitSpriteSrcRect(0,0,80,80,10,7)
 
-        renderer.SetDisplay {
-            scene.GetSceneRenderer().DrawObject(it,player,player.width,player.height,0)
+        renderer.SetDisplay { canvas: Canvas, FPS: Long? ->
+            player.Render(canvas,renderer,player.width,player.height,0)
             if (player.jump)
                 player.Jump()
             if (player.run != None)
-                player.Run(player.run)
+                player.Run()
+            if (player.drop)
+                player.Drop()
         }
 
+        scene.SetSceneRenderer(renderer)
         scene.SetCamera(camera)
-        scene.SetRenderer(renderer)
 
         InitSkillButton()
     }
@@ -83,6 +94,21 @@ class Game : Activity() , View.OnTouchListener
         DownButton.setOnTouchListener(this)
         LeftButton.setOnTouchListener(this)
         RightButton.setOnTouchListener(this)
+
+        ui_view.SetClick { touch_x = it?.rawX!!;touch_y = it.rawY }
+
+        ui_view.SetMove {
+            if (it != null)
+            {
+                val dx = it.rawX - touch_x
+                val dy = it.rawY - touch_y
+
+                camera.look_at_x += dx / 100
+                camera.look_at_y += dy / 100
+
+                Log.e("ViewMove","X:" + camera.look_at_x + "Y:" + camera.look_at_y)
+            }
+        }
     }
 
     fun InitSkillButton()
@@ -103,6 +129,19 @@ class Game : Activity() , View.OnTouchListener
         val button_10:ImageButton = ImageButton("UI/RockerButton.png",assets,1 * button_width,2 * button_height,button_width,button_height)
         val button_11:ImageButton = ImageButton("UI/RockerButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
         val button_12:ImageButton = ImageButton("UI/RockerButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
+
+        button_1.SetAlpha(0x40)
+        button_2.SetAlpha(0x40)
+        button_3.SetAlpha(0x40)
+        button_4.SetAlpha(0x40)
+        button_5.SetAlpha(0x40)
+        button_6.SetAlpha(0x40)
+        button_7.SetAlpha(0x40)
+        button_8.SetAlpha(0x40)
+        button_9.SetAlpha(0x40)
+        button_10.SetAlpha(0x40)
+        button_11.SetAlpha(0x40)
+        button_12.SetAlpha(0x40)
 
         skill_button.SetClick { player.Skill(this) }
         button_1.SetClick { player.skill_button_1 = true }
@@ -138,6 +177,8 @@ class Game : Activity() , View.OnTouchListener
     {
         if (event?.action == MotionEvent.ACTION_DOWN)
         {
+            touch_x = event.rawX
+            touch_y = event.rawY
             when (v?.id)
             {
                 R.id.JumpButton -> player.jump = true
@@ -145,7 +186,7 @@ class Game : Activity() , View.OnTouchListener
                 R.id.RightButton -> player.run = WayRight
             }
         }
-        else if (event?.action == MotionEvent.ACTION_UP)
+        if (event?.action == MotionEvent.ACTION_UP)
         {
             when(v?.id)
             {

@@ -1,6 +1,6 @@
 package com.fly.physics
 
-open class RigidBody(m:Float = 0f, g:Float = 9.8f, f:Float = 0f, F:Float = 0f)
+class RigidBody(m:Float = 0f, g:Float = 9.8f, f:Float = 0f, F:Float = 0f)
 {
     var mass : Float = m          //质量
     var gravity : Float = g       //重力
@@ -10,6 +10,6 @@ open class RigidBody(m:Float = 0f, g:Float = 9.8f, f:Float = 0f, F:Float = 0f)
     fun GetDropVelocity(initial_velocity:Float/*单位为米*/,time:Float/*单位为秒*/) : Float
     { val velocity:Float = initial_velocity + gravity * time * time;return velocity }
 
-    fun GetDropHeight(time:Float/*单位为秒*/) : Float { val height:Float = gravity * time * time / 2;return height }
+    fun GetDropHeight(time: Float/*单位为秒*/) : Float { val height:Float = gravity * time * time / 2;return height }
     fun GetDropHeight(initial_velocity/*单位为米*/: Float,time:Float/*单位为秒*/) : Float { return GetDropVelocity(initial_velocity,time) / 2 }
 }
