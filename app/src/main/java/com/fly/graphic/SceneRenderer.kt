@@ -133,6 +133,7 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
         val obj_height = height * height_ratio
         obj_last_x = obj_x
         obj_last_y = obj_y
+
         if (obj.GetRigid() != null)
         {
             if (obj.GetCollisionBox() != null)
@@ -146,7 +147,7 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
                     {
                         if (will_y + obj_height > obj.GetCollisionBox()!!.GetCollisionRect().top)
                         {
-                            if (!(will_y + obj_height < obj.GetCollisionBox()!!.GetCollisionRect().top + 0.2f * height_ratio) && obj_next_y != null)
+                            if (!(will_y + obj_height < obj.GetCollisionBox()!!.GetCollisionRect().top + 0.1f * height_ratio))
                                 obj.y -= will_y + obj_height - obj.GetCollisionBox()!!.GetCollisionRect().top / height_ratio
                             else
                                 obj_next_y = obj.GetCollisionBox()!!.GetCollisionRect().top / height_ratio - height
@@ -173,6 +174,8 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
         }
 
         obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        if (obj_next_y != null)
+            obj.y = obj_next_y!!
         obj_next_y = null
     }
 

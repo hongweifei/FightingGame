@@ -2,15 +2,18 @@ package com.fly.game
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.RectF
 import android.util.Log
 import android.widget.Toast
 import com.fly.graphic.Object
+import com.fly.graphic.Scene
+import com.fly.physics.CollisionBox
 
 val None = 0
 val WayLeft = -1
 val WayRight = 1
 
-class Player(path: String? = null,asset_manager: AssetManager? = null) : Object()
+class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManager? = null) : Object()
 {
     var speed = 0.1f
 
@@ -34,6 +37,11 @@ class Player(path: String? = null,asset_manager: AssetManager? = null) : Object(
 
     init
     {
+        if (scene != null)
+        {
+            width_ratio = scene.GetSceneWidthRatio()
+            height_ratio = scene.GetSceneHeightRatio()
+        }
         if (path != null && asset_manager != null)
             super.SetSprite(path,asset_manager,true,false)
     }
@@ -56,6 +64,20 @@ class Player(path: String? = null,asset_manager: AssetManager? = null) : Object(
             x -= speed
         if (way == WayRight)
             x += speed
+
+        collision_box?.SetRect(RectF(x * width_ratio,y * height_ratio,(x + width) * width_ratio,(y + height)*height_ratio))!!
+        if(collision_box?.Collision()!!)
+        {
+            if ((y + height) * height_ratio > collision_box?.GetCollisionRect()?.top!!
+                && y * height_ratio < collision_box?.GetCollisionRect()?.bottom!!)
+            {
+                Log.e("Run","碰撞")
+                if (way == WayLeft)
+                    x = collision_box?.GetCollisionRect()?.right!! / width_ratio + 1 / width_ratio
+                else if (way == WayRight)
+                    x = collision_box?.GetCollisionRect()?.left!! / width_ratio - width - 1 / width_ratio
+            }
+        }
     }
 
     fun Jump()
@@ -88,7 +110,10 @@ class Player(path: String? = null,asset_manager: AssetManager? = null) : Object(
     {
         if (collision_box!= null && collision_box!!.Collision())
         {
-            drop = false
+            if (y + height >= collision_box?.GetCollisionRect()?.top!!/height_ratio)
+                drop = false
+
+            Log.e("Drop",drop.toString())
         }
     }
 }

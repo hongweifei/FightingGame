@@ -27,8 +27,8 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
     protected var width_ratio:Float
     protected var height_ratio:Float
 
-    protected var scene_width = 10f
-    protected var scene_height = 5f
+    protected var scene_width = 16f
+    protected var scene_height = 9f
 
     init
     {

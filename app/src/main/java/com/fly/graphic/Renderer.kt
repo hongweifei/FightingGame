@@ -156,7 +156,7 @@ open class Renderer()
                     {
                         if (will_y + height > obj.GetCollisionBox()!!.GetCollisionRect().top)
                         {
-                            if (!(will_y + height < obj.GetCollisionBox()!!.GetCollisionRect().top + 10f) && obj_next_y != null)
+                            if (!(will_y + height < obj.GetCollisionBox()!!.GetCollisionRect().top + 10f))
                                 obj.y -= will_y + height - obj.GetCollisionBox()!!.GetCollisionRect().top
                             else
                                 obj_next_y = obj.GetCollisionBox()!!.GetCollisionRect().top - height
@@ -182,6 +182,8 @@ open class Renderer()
         }
 
         obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        if (obj_next_y != null)
+            obj.y = obj_next_y!!
         obj_next_y = null
     }
 

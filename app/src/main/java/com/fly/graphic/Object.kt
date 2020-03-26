@@ -17,6 +17,12 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
     protected var width_ratio:Float = 1f
     protected var height_ratio:Float = 1f
 
+    private var render_animation = false
+    private var render_n:Int = 0
+    private var render_index = 0
+    private var render_last_begin:Int? = null
+    private var render_last_end:Int? = null
+
     protected var sprite:Sprite? = null
     protected var animator:Animator? = null
     protected var rigid_body: RigidBody? = null
@@ -70,9 +76,9 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
 
     fun AddAnimation(animation: Animation) { animator?.AddAnimation(animation) }
 
-    fun AddCollide(r:RectF) { if (collision_box != null) collision_box?.AddCollide(r) }
-    fun AddCollide(collision_box: CollisionBox) { if (this.collision_box != null) this.collision_box?.AddCollide(collision_box) }
-    fun AddCollide(obj:Object) { if (collision_box != null && obj.collision_box != null) collision_box?.AddCollide(obj.collision_box!!) }
+    fun AddCollide(r:RectF) { collision_box?.AddCollide(r) }
+    fun AddCollide(collision_box: CollisionBox) { this.collision_box?.AddCollide(collision_box) }
+    fun AddCollide(obj:Object) { collision_box?.AddCollide(obj.collision_box!!) }
 
     fun InitSrcRect(rect_list:ArrayList<Rect>) { sprite?.GetSrcRect()?.clear();sprite?.SetSrcRect(rect_list) }
     fun InitSpriteSrcRect(start_x:Int,start_y:Int,width:Int,height:Int,horizontal:Int,vertical:Int)
@@ -86,6 +92,19 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
     fun RenderAnimation(canvas: Canvas, renderer: Renderer, FPS:Int,index:Int) { animator?.RenderAnimation(canvas,renderer,FPS,x * width_ratio, y * height_ratio, index) }
     fun RenderAnimation(canvas: Canvas, renderer: Renderer, width: Float,height: Float,FPS:Int,index:Int)
     { animator?.RenderAnimation(canvas, renderer, FPS, x * width_ratio, y * height_ratio, width * width_ratio, height * height_ratio, index) }
+
+    fun RenderObjectAnimation(canvas: Canvas,renderer: Renderer,begin_index:Int = 0,end_index:Int = 0,FPS:Int = 0)
+    { RenderObjectAnimation(canvas, renderer, width, height, begin_index, end_index, FPS) }
+    fun RenderObjectAnimation(canvas: Canvas,renderer: Renderer,width: Float = this.width,height: Float = this.height,begin_index:Int = 0,end_index:Int = 0,FPS:Int = 0)
+    {
+        if (!render_animation) { render_index = begin_index;render_last_begin = begin_index;render_last_end = end_index;render_animation = true }
+        else { if (render_last_begin != begin_index || render_last_end != end_index) { render_index = begin_index;render_last_begin = begin_index;render_last_end = end_index } }
+        renderer.DrawObject(canvas,this,width,height,render_index)
+        if (render_n >= FPS) { render_n = 0;render_index++ }
+        else if (render_n < FPS) { render_n++ }
+        if (render_index > end_index)
+            render_animation = false
+    }
 
     //fun Render(canvas: Canvas, renderer: Renderer) { renderer.DrawObject(canvas,this) }
     fun Render(canvas: Canvas, renderer: Renderer) { renderer.DrawObject(canvas,this) }

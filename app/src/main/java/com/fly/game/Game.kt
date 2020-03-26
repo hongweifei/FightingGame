@@ -11,8 +11,6 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import com.fly.animation.Animation
-import com.fly.animation.Animator
 import com.fly.fightinggame.R
 import com.fly.graphic.Camera
 import com.fly.graphic.Object
@@ -76,24 +74,16 @@ class Game : Activity() , View.OnTouchListener
         wall.y = height - wall.height
         wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y + wall.height / 2,wall.x + wall.width,wall.y + wall.height / 2 + wall.height)))
 
-        player = Player("player/Kakashi_Right.png",assets)
-        player.x = 0f
-        player.y = 0f
+        player = Player(scene,"player/Kakashi_Right.png",assets)
         player.width = width / 10
         player.height = height / 5
+        player.x = width / 2 - player.width / 2
+        player.y = 0f
         //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,1.98f))
+        player.SetRigidBody(RigidBody(0f,9.8f))
         player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
         player.AddCollide(wall)
         player.InitSpriteSrcRect(0,0,80,80,10,7)
-
-        val animation:Animation = Animation()
-        for (i in 4 until 8)
-            animation.AddFrame("player/Kakashi_Right.png",assets,i * 80,0,80,80)
-
-        val animator:Animator = Animator()
-        player.SetAnimator(animator)
-        player.AddAnimation(animation)
 
         scene.SetSceneRenderer(renderer)
         scene.SetCamera(camera)
@@ -102,18 +92,18 @@ class Game : Activity() , View.OnTouchListener
         renderer.SetDisplay {
             wall.Render(it,renderer)
             if (player.way == WayLeft && player.run == None)
-                player.RenderSpriteAnimation(it,renderer,6,9,4)
+                player.RenderObjectAnimation(it,renderer,6,9,4)
             else if(player.way == WayRight && player.run == None)
-                player.RenderSpriteAnimation(it,renderer,0,3,4)
+                player.RenderObjectAnimation(it,renderer,0,3,4)
             if (player.jump)
                 player.Jump()
             if (player.run != None)
             {
                 player.Run()
                 if (player.way == WayLeft)
-                    player.RenderSpriteAnimation(it,renderer,2,5,4)
+                    player.RenderObjectAnimation(it,renderer,2,5,4)
                 else if(player.way == WayRight)
-                    player.RenderAnimation(it,renderer,player.width,player.height,4,0)
+                    player.RenderObjectAnimation(it,renderer,4,7,4)
             }
             if (player.drop)
                 player.Drop()
