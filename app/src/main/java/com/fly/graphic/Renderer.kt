@@ -3,21 +3,20 @@ package com.fly.graphic
 
 import android.content.res.AssetManager
 import android.graphics.*
-import android.graphics.drawable.ShapeDrawable
 import android.view.View.LAYER_TYPE_HARDWARE
 import android.view.View.LAYER_TYPE_SOFTWARE
 
 
 open class Renderer()
 {
-    private var render : (canvas : Canvas,FPS:Long?) -> Unit = { canvas: Canvas, FPS: Long? -> };
+    private var render : (canvas : Canvas) -> Unit = {};
+    protected var render_time:Long = 1
     protected var paint : Paint = Paint()
     private var layer_type = LAYER_TYPE_HARDWARE
 
-    protected var FPS:Long? = null
-
     protected var obj_last_x:Float? = null
     protected var obj_last_y:Float? = null
+    protected var obj_next_y:Float? = null
 
     init
     {
@@ -34,8 +33,15 @@ open class Renderer()
         paint.textScaleX = 1f;//只会将水平方向拉伸  高度不会变
     }
 
-    fun SetDisplay(Display: (canvas : Canvas,FPS:Long?) -> Unit) { render = Display }
-    fun Display(canvas: Canvas,FPS:Long?) { this.FPS = FPS;render(canvas,FPS) }
+    fun SetDisplay(Display: (canvas : Canvas) -> Unit) { render = Display }
+    fun Display(canvas: Canvas)
+    {
+        val begin_time = System.currentTimeMillis();
+        render(canvas);
+        render_time = System.currentTimeMillis() - begin_time
+        if (render_time <= 0)
+            render_time++
+    }
 
     fun SetStrokeWidth(stroke_width:Float) { paint.strokeWidth = stroke_width }
     fun SetAntiAlias(aa:Boolean) { paint.isAntiAlias = aa }
@@ -49,6 +55,7 @@ open class Renderer()
     fun GetWidth(canvas: Canvas) : Int { return canvas.width }
     fun GetPaint() : Paint { return paint }
     fun GetLayerType() : Int { return layer_type }
+    fun GetRenderTime() : Long { return render_time }
 
     open fun DrawPoint(canvas: Canvas, x:Float, y:Float){ canvas.drawPoint(x,y,paint) }
     open fun DrawPoints(canvas: Canvas, pts:FloatArray) { canvas.drawPoints(pts,paint) }
@@ -115,14 +122,14 @@ open class Renderer()
         canvas.drawBitmap(bitmap,left,top,paint)
     }
 
-    open fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float = 0f, y: Float = 0f, width:Int = sprite.width, height:Int = sprite.height, index:Int = 0)
+    open fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float = 0f, y: Float = 0f, width:Float = sprite.width, height:Float = sprite.height, index:Int = 0)
     {
-        val dst:RectF = RectF(x,y,x + width.toFloat(),y + height.toFloat())
+        val dst:RectF = RectF(x,y,x + width,y + height)
         sprite.GetBitmap()?.let { canvas.drawBitmap(it,sprite.GetSrcRect(index),dst,paint) }
     }
-    open fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float = 0f, y: Float = 0f, width:Int = sprite.width, height:Int = sprite.height, index:Int = 0, flip_x:Float = 1f, flip_y: Float = 1f)
+    open fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float = 0f, y: Float = 0f, width:Float = sprite.width, height:Float = sprite.height, index:Int = 0, flip_x:Float = 1f, flip_y: Float = 1f)
     {
-        val dst:RectF = RectF(x,y,x + width.toFloat(),y + height.toFloat())
+        val dst:RectF = RectF(x,y,x + width,y + height)
         val matrix:Matrix = Matrix()
 
         matrix.setScale(flip_x,flip_y)
@@ -132,43 +139,50 @@ open class Renderer()
         sprite.GetBitmap()?.let { canvas.drawBitmap(it,matrix,paint) }
     }
 
-    open fun DrawObject(canvas: Canvas, obj: Object, width: Int = obj.width, height: Int = obj.height, index: Int = 0)
+    open fun DrawObject(canvas: Canvas, obj: Object, width: Float = obj.width, height: Float = obj.height, index: Int = 0)
     {
         obj_last_x = obj.x
         obj_last_y = obj.y
-        obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
-        if (obj.GetRigid() != null && FPS != null)
+        if (obj.GetRigid() != null)
         {
             if (obj.GetCollisionBox() != null)
             {
                 obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
                 if (!obj.GetCollisionBox()!!.Collision())
                 {
-                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
                     obj.GetCollisionBox()!!.SetRect(RectF(obj.x,will_y,obj.x + width,will_y + height))
                     if (obj.GetCollisionBox()!!.Collision())
                     {
-                        if (will_y > obj.GetCollisionBox()!!.GetCollisionRect().top)
-                            obj.y = obj.GetCollisionBox()!!.GetCollisionRect().top
+                        if (will_y + height > obj.GetCollisionBox()!!.GetCollisionRect().top)
+                        {
+                            if (!(will_y + height < obj.GetCollisionBox()!!.GetCollisionRect().top + 10f) && obj_next_y != null)
+                                obj.y -= will_y + height - obj.GetCollisionBox()!!.GetCollisionRect().top
+                            else
+                                obj_next_y = obj.GetCollisionBox()!!.GetCollisionRect().top - height
+                        }
                     }
                     else
                     {
-                        obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
+                        //obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
                         for (i in 0 until obj.GetCollisionBox()!!.GetAllCollisionRect().size)
                         {
                             if (obj.y > obj.GetCollisionBox()!!.GetAllCollisionRect()[i].bottom && obj_last_y!! + height < obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top)
                             {
-                                obj.y = obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top
+                                obj.y = obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top - height
                                 return
                             }
                         }
-                        obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                        obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
                     }
                 }
             }
             else
-                obj.y += obj.GetRigid()!!.GetDropHeight((1000 / FPS!!).toFloat())
+                obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
         }
+
+        obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        obj_next_y = null
     }
 
 }

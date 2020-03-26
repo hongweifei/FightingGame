@@ -4,21 +4,31 @@ import android.content.res.AssetManager
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.RectF
+import com.fly.animation.Animation
+import com.fly.animation.Animator
 import com.fly.physics.CollisionBox
 import com.fly.physics.RigidBody
 
-open class Object(var x:Float = 0f, var y:Float = 0f)
+open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
 {
-    var width:Int = 0
-    var height:Int = 0
+    var width:Float = 0f
+    var height:Float = 0f
+
+    protected var width_ratio:Float = 1f
+    protected var height_ratio:Float = 1f
 
     protected var sprite:Sprite? = null
+    protected var animator:Animator? = null
     protected var rigid_body: RigidBody? = null
     protected var collision_box:CollisionBox? = null
 
     init
     {
-
+        if (scene != null)
+        {
+            width_ratio = scene.GetSceneWidthRatio()
+            height_ratio = scene.GetSceneHeightRatio()
+        }
     }
 
     fun SetSprite(sprite: Sprite,init_w_h:Boolean = true,sprite_rect_continue:Boolean = false)
@@ -39,23 +49,47 @@ open class Object(var x:Float = 0f, var y:Float = 0f)
         if (init_w_h) { width = this.sprite!!.width;height = this.sprite!!.height }
     }
 
+    fun SetAnimator(animator: Animator) { this.animator = animator }
+
     fun SetRigidBody(rigid_body: RigidBody) { this.rigid_body = rigid_body }
-    fun SetCollisionBox(collision_box: CollisionBox) { this.collision_box = collision_box }
+    fun SetCollisionBox(collision_box: CollisionBox)
+    {
+        val box:CollisionBox = collision_box
+        if (box.rect != null)
+        {
+            box.rect = RectF(box.rect!!.left * width_ratio,box.rect!!.top * height_ratio,
+                box.rect!!.right * width_ratio,box.rect!!.bottom * height_ratio)
+        }
+        this.collision_box = box
+    }
 
     fun GetSprite() : Sprite? { return sprite }
+    fun GetAnimator() : Animator? { return animator }
     fun GetRigid() : RigidBody? { return rigid_body }
     fun GetCollisionBox() : CollisionBox? { return collision_box }
 
-    fun AddCollide(r:RectF) { collision_box?.AddCollide(r) }
-    fun AddCollide(collision_box: CollisionBox) { this.collision_box?.AddCollide(collision_box) }
-    fun AddCollide(obj:Object) { collision_box?.AddCollide(obj.collision_box!!) }
+    fun AddAnimation(animation: Animation) { animator?.AddAnimation(animation) }
+
+    fun AddCollide(r:RectF) { if (collision_box != null) collision_box?.AddCollide(r) }
+    fun AddCollide(collision_box: CollisionBox) { if (this.collision_box != null) this.collision_box?.AddCollide(collision_box) }
+    fun AddCollide(obj:Object) { if (collision_box != null && obj.collision_box != null) collision_box?.AddCollide(obj.collision_box!!) }
 
     fun InitSrcRect(rect_list:ArrayList<Rect>) { sprite?.GetSrcRect()?.clear();sprite?.SetSrcRect(rect_list) }
     fun InitSpriteSrcRect(start_x:Int,start_y:Int,width:Int,height:Int,horizontal:Int,vertical:Int)
     { sprite?.InitSrcRect(start_x,start_y, width, height, horizontal, vertical) }
 
+    fun RenderSpriteAnimation(canvas: Canvas,renderer: Renderer,begin_index:Int,end_index:Int,FPS:Int)
+    { sprite?.RenderSpriteAnimation(canvas,renderer, x, y, width, height,begin_index, end_index, FPS) }
+    fun RenderSpriteAnimation(canvas: Canvas,renderer: Renderer,width: Float,height: Float,begin_index:Int,end_index:Int,FPS:Int)
+    { sprite?.RenderSpriteAnimation(canvas,renderer, x, y, width, height,begin_index, end_index, FPS) }
+
+    fun RenderAnimation(canvas: Canvas, renderer: Renderer, FPS:Int,index:Int) { animator?.RenderAnimation(canvas,renderer,FPS,x * width_ratio, y * height_ratio, index) }
+    fun RenderAnimation(canvas: Canvas, renderer: Renderer, width: Float,height: Float,FPS:Int,index:Int)
+    { animator?.RenderAnimation(canvas, renderer, FPS, x * width_ratio, y * height_ratio, width * width_ratio, height * height_ratio, index) }
+
     //fun Render(canvas: Canvas, renderer: Renderer) { renderer.DrawObject(canvas,this) }
-    fun Render(canvas: Canvas, renderer: SceneRenderer) { renderer.DrawObject(canvas,this) }
-    fun Render(canvas: Canvas, renderer: SceneRenderer, width: Int = this.width, height: Int = this.height, index: Int)
+    fun Render(canvas: Canvas, renderer: Renderer) { renderer.DrawObject(canvas,this) }
+    fun Render(canvas: Canvas, renderer: Renderer,index: Int) { renderer.DrawObject(canvas,this,width, height,index) }
+    fun Render(canvas: Canvas, renderer: Renderer, width: Float = this.width, height: Float = this.height, index: Int)
     { renderer.DrawObject(canvas,this,width,height,index) }
 }

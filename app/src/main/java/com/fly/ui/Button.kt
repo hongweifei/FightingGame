@@ -4,7 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import com.fly.graphic.Renderer
 
-open class Button(var text:String = "Button", x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0) : Widget(x,y,width,height)
+open class Button(var text:String = "Button", x:Float = 0f, y:Float = 0f, width:Float = 0f, height:Float = 0f) : Widget(x,y,width,height)
 {
     init
     {
@@ -26,21 +26,21 @@ open class Button(var text:String = "Button", x:Int = 0, y:Int = 0, width:Int = 
         r.SetStyle(Paint.Style.STROKE)
         r.DrawRect(canvas,x,y,width,height)
     }
-    override fun Render(canvas: Canvas,renderer: Renderer,x: Int,y: Int)
+    override fun Render(canvas: Canvas,renderer: Renderer,x: Float,y: Float)
     {
         val r:Renderer = renderer
         r.SetAlpha(alpha)
         r.DrawText(canvas,text,x.toFloat(),y.toFloat());renderer.DrawRect(canvas,x,y,width,height)
         r.SetStyle(Paint.Style.STROKE)
-        r.DrawRect(canvas,x,y,width,height)
+        r.DrawRect(canvas,x,y,x + width,y + height)
     }
-    override fun Render(canvas: Canvas,renderer: Renderer,x:Int,y:Int,width:Int,height:Int)
+    override fun Render(canvas: Canvas,renderer: Renderer,x:Float,y:Float,width:Float,height:Float)
     {
         val r:Renderer = renderer
         r.SetAlpha(alpha)
-        r.DrawText(canvas,text,x.toFloat(),y.toFloat());renderer.DrawRect(canvas,x,y,width,height)
+        r.DrawText(canvas,text,x,y);renderer.DrawRect(canvas,x,y,x + width,y + height)
         r.SetStyle(Paint.Style.STROKE)
-        r.DrawRect(canvas,x,y,width,height)
+        r.DrawRect(canvas,x,y,x + width,y + height)
     }
 
 }

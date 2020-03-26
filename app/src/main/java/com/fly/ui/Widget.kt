@@ -3,7 +3,7 @@ package com.fly.ui
 import android.graphics.Canvas
 import com.fly.graphic.Renderer
 
-open class Widget(var x:Int = 0,var y:Int = 0,var width:Int = 0,var height:Int = 0)
+open class Widget(var x:Float = 0f,var y:Float = 0f,var width:Float = 0f,var height:Float = 0f)
 {
     protected var alpha:Int = 255
 
@@ -17,8 +17,8 @@ open class Widget(var x:Int = 0,var y:Int = 0,var width:Int = 0,var height:Int =
 
     //fun SetRender(render: (canvas: Canvas,renderer: Renderer) -> Unit) { this.render = render }
     open fun Render(canvas: Canvas,renderer: Renderer) { return }
-    open fun Render(canvas: Canvas,renderer: Renderer,x: Int,y: Int) { return }
-    open fun Render(canvas: Canvas,renderer: Renderer,x:Int,y:Int,width:Int,height:Int) { return }
+    open fun Render(canvas: Canvas,renderer: Renderer,x: Float,y: Float) { return }
+    open fun Render(canvas: Canvas,renderer: Renderer,x:Float,y:Float,width:Float,height:Float) { return }
 
     fun SetClick(click:() ->Unit) { this.click = click }
     fun Click() { click() }
