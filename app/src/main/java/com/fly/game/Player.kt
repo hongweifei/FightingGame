@@ -2,7 +2,6 @@ package com.fly.game
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.graphics.RectF
 import android.util.Log
 import android.widget.Toast
 import com.fly.graphic.Object
@@ -11,9 +10,9 @@ val None = 0
 val WayLeft = -1
 val WayRight = 1
 
-class Player(path: String,asset_manager: AssetManager) : Object()
+class Player(path: String? = null,asset_manager: AssetManager? = null) : Object()
 {
-    var speed = 5
+    var speed = 0.1f
 
     var way = WayRight
     var run = None
@@ -35,7 +34,8 @@ class Player(path: String,asset_manager: AssetManager) : Object()
 
     init
     {
-        super.SetSprite(path,asset_manager,true,false)
+        if (path != null && asset_manager != null)
+            super.SetSprite(path,asset_manager,true,false)
     }
 
     fun SetRun(way:Int,asset_manager: AssetManager)

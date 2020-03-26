@@ -2,13 +2,18 @@ package com.fly.graphic
 
 import android.content.res.AssetManager
 import android.graphics.*
+import androidx.core.graphics.toRect
 
 open class Sprite(path:String? = null, asset_manager: AssetManager? = null)
 {
     private var bitmap: Bitmap? = null
 
-    var width:Int = 0
-    var height:Int = 0
+    var width:Float = 0f
+    var height:Float = 0f
+
+    private var render_animation = false
+    private var render_n:Int = 0
+    private var render_index = 0
 
     private var rect_list:ArrayList<Rect> = ArrayList<Rect>()
 
@@ -29,22 +34,22 @@ open class Sprite(path:String? = null, asset_manager: AssetManager? = null)
         val bitmap = BitmapFactory.decodeFile(bitmap_path)
         this.bitmap = bitmap
 
-        width = bitmap.width
-        height = bitmap.height
+        width = bitmap.width.toFloat()
+        height = bitmap.height.toFloat()
 
         rect_list.clear()
-        rect_list.add(Rect(0,0,width,height))
+        rect_list.add(Rect(0,0, width.toInt(), height.toInt()))
     }
     fun SetBitmap(bitmap_path: String,asset_manager:AssetManager)
     {
         val bitmap = BitmapFactory.decodeStream(asset_manager.open(bitmap_path))
         this.bitmap = bitmap
 
-        width = bitmap.width
-        height = bitmap.height
+        width = bitmap.width.toFloat()
+        height = bitmap.height.toFloat()
 
         rect_list.clear()
-        rect_list.add(Rect(0,0,width,height))
+        rect_list.add(Rect(0,0, width.toInt(), height.toInt()))
     }
     fun SetSrcRect(rect_list: ArrayList<Rect>) { this.rect_list = rect_list }
 
@@ -56,8 +61,8 @@ open class Sprite(path:String? = null, asset_manager: AssetManager? = null)
     fun InitSrcRect(rect_list:ArrayList<Rect>) { this.rect_list.clear();this.rect_list = rect_list }
     fun InitSrcRect(start_x:Int,start_y:Int,width:Int,height:Int,horizontal:Int,vertical:Int)
     {
-        this.width = width
-        this.height = height
+        this.width = width.toFloat()
+        this.height = height.toFloat()
 
         rect_list.clear()
 
@@ -71,7 +76,25 @@ open class Sprite(path:String? = null, asset_manager: AssetManager? = null)
     }
 
     //fun render(canvas: Canvas, renderer:Renderer) { renderer.DrawSprite(canvas,this) }
-    fun render(canvas: Canvas, renderer:SceneRenderer) { renderer.DrawSprite(canvas,this) }
-    fun render(canvas: Canvas,x:Float,y:Float,width: Int = this.width,height: Int = this.height,index:Int = 0)
-    { bitmap?.let { canvas.drawBitmap(it,rect_list.get(index),RectF(x,y,x + width.toFloat(),y + height.toFloat()),null) } }
+    fun Render(canvas: Canvas, renderer:Renderer) { renderer.DrawSprite(canvas,this) }
+    fun Render(canvas: Canvas, renderer: Renderer,x:Float,y:Float,width: Float = this.width,height: Float = this.height,index:Int = 0)
+    { bitmap?.let { renderer.DrawSprite(canvas,this,x, y, width, height, index) } }
+    fun RenderSpriteAnimation(canvas: Canvas,renderer: Renderer,x:Float,y:Float,begin_index:Int = 0,end_index:Int = 0,FPS:Int = 0)
+    {
+        if (!render_animation) { render_index = begin_index;render_animation = true }
+        Render(canvas,renderer,x,y,width,height,render_index)
+        if (render_n >= FPS) { render_n = 0;render_index++ }
+        else if (render_n < FPS) { render_n++ }
+        if (render_index > end_index)
+            render_animation = false
+    }
+    fun RenderSpriteAnimation(canvas: Canvas,renderer: Renderer,x: Float,y: Float,width: Float = this.width,height: Float = this.height,begin_index:Int = 0,end_index:Int = 0,FPS:Int = 0)
+    {
+        if (!render_animation) { render_index = begin_index;render_animation = true }
+        Render(canvas,renderer,x,y,width,height,render_index)
+        if (render_n >= FPS) { render_n = 0;render_index++ }
+        else if (render_n < FPS) { render_n++ }
+        if (render_index > end_index)
+            render_animation = false
+    }
 }

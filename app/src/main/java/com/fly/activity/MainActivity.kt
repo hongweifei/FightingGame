@@ -6,13 +6,12 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Process
 import android.view.View
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import com.fly.fightinggame.R
 import com.fly.game.Game
-import com.fly.mygame.R
 import kotlinx.android.synthetic.main.activity_main.*
 
-
+@SuppressLint("Registered")
 class MainActivity : AppCompatActivity(), View.OnClickListener
 {
     @SuppressLint("SourceLockedOrientationActivity")

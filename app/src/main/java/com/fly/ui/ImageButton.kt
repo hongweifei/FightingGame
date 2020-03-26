@@ -1,13 +1,10 @@
 package com.fly.ui
 
 import android.content.res.AssetManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Rect
+import android.graphics.*
 import com.fly.graphic.Renderer
 
-class ImageButton(path:String?,asset_manager:AssetManager?,x:Int = 0, y:Int = 0, width:Int = 0, height:Int = 0) : Button("",x,y,width,height)
+class ImageButton(path:String?,asset_manager:AssetManager?,x:Float = 0f, y:Float = 0f, width:Float = 0f, height:Float = 0f) : Button("",x,y,width,height)
 {
     private var bitmap:Bitmap
 
@@ -22,16 +19,16 @@ class ImageButton(path:String?,asset_manager:AssetManager?,x:Int = 0, y:Int = 0,
     override fun Render(canvas: Canvas, renderer: Renderer)
     {
         renderer.SetAlpha(alpha)
-        renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
+        renderer.DrawBitmap(canvas,bitmap,null, RectF(x,y,x + width,y + height))
     }
-    override fun Render(canvas: Canvas, renderer: Renderer, x: Int, y: Int)
+    override fun Render(canvas: Canvas, renderer: Renderer, x: Float, y: Float)
     {
         renderer.SetAlpha(alpha)
-        renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
+        renderer.DrawBitmap(canvas,bitmap,null,RectF(x,y,x + width,y + height))
     }
-    override fun Render(canvas: Canvas, renderer: Renderer, x: Int, y: Int, width: Int, height: Int)
+    override fun Render(canvas: Canvas, renderer: Renderer, x: Float, y: Float, width: Float, height: Float)
     {
         renderer.SetAlpha(alpha)
-        renderer.DrawBitmap(canvas,bitmap,null,Rect(x,y,x + width,y + height))
+        renderer.DrawBitmap(canvas,bitmap,null,RectF(x,y,x + width,y + height))
     }
 }

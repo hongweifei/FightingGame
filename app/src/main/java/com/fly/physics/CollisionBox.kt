@@ -1,18 +1,13 @@
 package com.fly.physics
 
 import android.graphics.RectF
-import android.util.Log
+import com.fly.graphic.Scene
 
 class CollisionBox(r:RectF? = null)
 {
     var rect: RectF? = r
     private var collide_rect:ArrayList<RectF> = ArrayList<RectF>()
     private var collide_index:Int? = null
-
-    init
-    {
-
-    }
 
     fun SetRect(r: RectF) { rect = r }
     fun SetRect(left:Float,top:Float,right:Float,bottom:Float) { rect = RectF(left,top, right, bottom) }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.graphics.Canvas
 import android.graphics.RectF
 import android.os.Bundle
 import android.util.DisplayMetrics
@@ -12,10 +11,12 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import com.fly.animation.Animation
+import com.fly.animation.Animator
+import com.fly.fightinggame.R
 import com.fly.graphic.Camera
 import com.fly.graphic.Object
 import com.fly.graphic.SceneRenderer
-import com.fly.mygame.R
 import com.fly.physics.CollisionBox
 import com.fly.physics.RigidBody
 import com.fly.ui.ImageButton
@@ -27,11 +28,13 @@ class Game : Activity() , View.OnTouchListener
     var camera: Camera = Camera(0f,0f)
     var renderer : SceneRenderer = SceneRenderer(camera)
 
-    var width:Int = 0
-    var height:Int = 0
+    var width:Float = 0f
+    var height:Float = 0f
 
     var touch_x:Float = 0f
     var touch_y:Float = 0f
+
+    val dm = DisplayMetrics()
 
     lateinit var player:Player
 
@@ -42,11 +45,10 @@ class Game : Activity() , View.OnTouchListener
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         val wm = this.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val dm = DisplayMetrics()
         wm.defaultDisplay.getMetrics(dm)
 
-        width = dm.widthPixels // 屏幕宽度（像素）
-        height = dm.heightPixels // 屏幕高度（像素）
+        //width = dm.widthPixels // 屏幕宽度（像素）
+        //height = dm.heightPixels // 屏幕高度（像素）
 
         //val density = dm.density // 屏幕密度（0.75 / 1.0 / 1.5）
         //val densityDpi = dm.densityDpi // 屏幕密度dpi（120 / 160 / 240）
@@ -56,49 +58,69 @@ class Game : Activity() , View.OnTouchListener
         //width = (width / density).toInt() // 屏幕宽度(dp)
         //height = (height / density).toInt() // 屏幕高度(dp)
 
+        width = 10f
+        height = 5f
 
         setContentView(R.layout.game)
         InitGame()
         Game()
     }
 
+    @SuppressLint("SetTextI18n")
     fun InitGame()
     {
-        val wall = Object()
-        wall.SetSprite("UI/RockerBackGround.png",assets)
+        val wall = Object(scene)
+        wall.SetSprite("ui/RockerBackGround.png",assets)
         wall.width = width
-        wall.height = height/5
-        wall.y = (height - wall.height).toFloat()
-        wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y,wall.x + wall.width,wall.y + wall.height)))
+        wall.height = height / 6
+        wall.y = height - wall.height
+        wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y + wall.height / 2,wall.x + wall.width,wall.y + wall.height / 2 + wall.height)))
 
         player = Player("player/Kakashi_Right.png",assets)
-        player.width = this.width / 10
-        player.height = this.height / 8
+        player.x = 0f
+        player.y = 0f
+        player.width = width / 10
+        player.height = height / 5
         //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,2f))
+        player.SetRigidBody(RigidBody(0f,1.98f))
         player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
         player.AddCollide(wall)
         player.InitSpriteSrcRect(0,0,80,80,10,7)
 
-        //renderer.SetShader()
-        renderer.SetDisplay { canvas: Canvas, FPS: Long? ->
-            wall.Render(canvas,renderer)
-            if (player.way == WayLeft)
-                player.Render(canvas,renderer,player.width,player.height,9)
-            else if(player.way == WayRight)
-                player.Render(canvas,renderer,player.width,player.height,0)
-            if (player.jump)
-                player.Jump()
-            if (player.run != None)
-                player.Run()
-            if (player.drop)
-                player.Drop()
+        val animation:Animation = Animation()
+        for (i in 4 until 8)
+            animation.AddFrame("player/Kakashi_Right.png",assets,i * 80,0,80,80)
 
-            textView.text = FPS.toString()
-        }
+        val animator:Animator = Animator()
+        player.SetAnimator(animator)
+        player.AddAnimation(animation)
 
         scene.SetSceneRenderer(renderer)
         scene.SetCamera(camera)
+
+        //renderer.SetShader()
+        renderer.SetDisplay {
+            wall.Render(it,renderer)
+            if (player.way == WayLeft && player.run == None)
+                player.RenderSpriteAnimation(it,renderer,6,9,4)
+            else if(player.way == WayRight && player.run == None)
+                player.RenderSpriteAnimation(it,renderer,0,3,4)
+            if (player.jump)
+                player.Jump()
+            if (player.run != None)
+            {
+                player.Run()
+                if (player.way == WayLeft)
+                    player.RenderSpriteAnimation(it,renderer,2,5,4)
+                else if(player.way == WayRight)
+                    player.RenderAnimation(it,renderer,player.width,player.height,4,0)
+            }
+            if (player.drop)
+                player.Drop()
+
+            //textView.text = "FPS:" + (1000 / renderer.GetRenderTime()).toString()
+        }
+
 
         InitSkillButton()
     }
@@ -118,8 +140,8 @@ class Game : Activity() , View.OnTouchListener
                 val dx = it.rawX - touch_x
                 val dy = it.rawY - touch_y
 
-                camera.look_at_x += dx / 90
-                camera.look_at_y += dy / 90
+                camera.look_at_x += dx / 1000
+                camera.look_at_y += dy / 1000
 
                 Log.e("ViewMove","X:" + camera.look_at_x + "Y:" + camera.look_at_y)
             }
@@ -128,22 +150,22 @@ class Game : Activity() , View.OnTouchListener
 
     fun InitSkillButton()
     {
-        val button_width = width / 2 / 6
-        val button_height = height / 2 / 5
+        val button_width:Float = (dm.widthPixels / 2 / 6).toFloat()
+        val button_height:Float = (dm.heightPixels / 2 / 5).toFloat()
 
-        val skill_button:ImageButton = ImageButton("UI/RockerButton.png",assets,width - button_width,height/2,button_width,button_height)
-        val button_1:ImageButton = ImageButton("UI/RockerButton.png",assets,0 * button_width,0 * button_height,button_width,button_height)
-        val button_2:ImageButton = ImageButton("UI/RockerButton.png",assets,1 * button_width,0 * button_height,button_width,button_height)
-        val button_3:ImageButton = ImageButton("UI/RockerButton.png",assets,2 * button_width,0 * button_height,button_width,button_height)
-        val button_4:ImageButton = ImageButton("UI/RockerButton.png",assets,3 * button_width,0 * button_height,button_width,button_height)
-        val button_5:ImageButton = ImageButton("UI/RockerButton.png",assets,0 * button_width,1 * button_height,button_width,button_height)
-        val button_6:ImageButton = ImageButton("UI/RockerButton.png",assets,1 * button_width,1 * button_height,button_width,button_height)
-        val button_7:ImageButton = ImageButton("UI/RockerButton.png",assets,2 * button_width,1 * button_height,button_width,button_height)
-        val button_8:ImageButton = ImageButton("UI/RockerButton.png",assets,3 * button_width,1 * button_height,button_width,button_height)
-        val button_9:ImageButton = ImageButton("UI/RockerButton.png",assets,0 * button_width,2 * button_height,button_width,button_height)
-        val button_10:ImageButton = ImageButton("UI/RockerButton.png",assets,1 * button_width,2 * button_height,button_width,button_height)
-        val button_11:ImageButton = ImageButton("UI/RockerButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
-        val button_12:ImageButton = ImageButton("UI/RockerButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
+        val skill_button:ImageButton = ImageButton("ui/RockerButton.png",assets,dm.widthPixels - button_width,dm.heightPixels.toFloat()/2,button_width,button_height)
+        val button_1:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,0 * button_height,button_width,button_height)
+        val button_2:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,0 * button_height,button_width,button_height)
+        val button_3:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,0 * button_height,button_width,button_height)
+        val button_4:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,0 * button_height,button_width,button_height)
+        val button_5:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,1 * button_height,button_width,button_height)
+        val button_6:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,1 * button_height,button_width,button_height)
+        val button_7:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,1 * button_height,button_width,button_height)
+        val button_8:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,1 * button_height,button_width,button_height)
+        val button_9:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,2 * button_height,button_width,button_height)
+        val button_10:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,2 * button_height,button_width,button_height)
+        val button_11:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
+        val button_12:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
 
         button_1.SetAlpha(40)
         button_2.SetAlpha(40)
