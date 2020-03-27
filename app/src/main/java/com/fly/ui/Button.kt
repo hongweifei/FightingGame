@@ -19,28 +19,19 @@ open class Button(var text:String = "Button", x:Float = 0f, y:Float = 0f, width:
 
     override fun Render(canvas: Canvas,renderer: Renderer)
     {
-        val r:Renderer = renderer
-
-        r.SetAlpha(alpha)
-        r.DrawText(canvas,text,x.toFloat(),y.toFloat() + height / 2);
-        r.SetStyle(Paint.Style.STROKE)
-        r.DrawRect(canvas,x,y,width,height)
+        Render(canvas, renderer, x, y)
     }
     override fun Render(canvas: Canvas,renderer: Renderer,x: Float,y: Float)
     {
-        val r:Renderer = renderer
-        r.SetAlpha(alpha)
-        r.DrawText(canvas,text,x.toFloat(),y.toFloat());renderer.DrawRect(canvas,x,y,width,height)
-        r.SetStyle(Paint.Style.STROKE)
-        r.DrawRect(canvas,x,y,x + width,y + height)
+        Render(canvas, renderer, x, y, width, height)
     }
     override fun Render(canvas: Canvas,renderer: Renderer,x:Float,y:Float,width:Float,height:Float)
     {
-        val r:Renderer = renderer
-        r.SetAlpha(alpha)
-        r.DrawText(canvas,text,x,y);renderer.DrawRect(canvas,x,y,x + width,y + height)
-        r.SetStyle(Paint.Style.STROKE)
-        r.DrawRect(canvas,x,y,x + width,y + height)
+        renderer.SetAlpha(alpha)
+        renderer.DrawText(canvas,text,x,y);renderer.DrawRect(canvas,x,y,x + width,y + height)
+        renderer.SetStyle(Paint.Style.STROKE)
+        renderer.DrawRect(canvas,x,y,x + width,y + height)
+        renderer.SetStyle(Paint.Style.FILL_AND_STROKE)
     }
 
 }

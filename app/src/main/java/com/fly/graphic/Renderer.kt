@@ -10,7 +10,7 @@ import android.view.View.LAYER_TYPE_SOFTWARE
 open class Renderer()
 {
     private var render : (canvas : Canvas) -> Unit = {};
-    protected var render_time:Long = 1
+    protected var render_time:Long = 0
     protected var paint : Paint = Paint()
     private var layer_type = LAYER_TYPE_HARDWARE
 
@@ -150,7 +150,7 @@ open class Renderer()
                 obj.GetCollisionBox()!!.SetRect(RectF(obj.x,obj.y,obj.x + width,obj.y + height))
                 if (!obj.GetCollisionBox()!!.Collision())
                 {
-                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
+                    val will_y = obj.y + obj.GetRigid()!!.GetDropHeight(render_time)
                     obj.GetCollisionBox()!!.SetRect(RectF(obj.x,will_y,obj.x + width,will_y + height))
                     if (obj.GetCollisionBox()!!.Collision())
                     {
@@ -173,12 +173,12 @@ open class Renderer()
                                 return
                             }
                         }
-                        obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
+                        obj.y += obj.GetRigid()!!.GetDropHeight(render_time)
                     }
                 }
             }
             else
-                obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
+                obj.y += obj.GetRigid()!!.GetDropHeight(render_time)
         }
 
         obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }

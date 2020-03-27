@@ -2,11 +2,12 @@ package com.fly.graphic
 
 import android.content.res.AssetManager
 import android.graphics.*
+import android.util.Log
 
-class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
+class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) : Renderer()
 {
-    private var width_ratio = 1f
-    private var height_ratio = 1f
+    private var width_ratio = scene?.GetSceneWidthRatio() ?: 1f
+    private var height_ratio = scene?.GetSceneHeightRatio() ?: 1f
 
     fun SetWidthRatio(width_ratio:Float){ this.width_ratio = width_ratio }
     fun SetHeightRatio(height_ratio:Float){ this.height_ratio = height_ratio }
@@ -66,15 +67,27 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
     //override fun DrawBitmap(canvas: Canvas, bitmap: Bitmap, matrix: Matrix) { canvas.drawBitmap(bitmap,matrix,super.GetPaint()) }
     override fun DrawBitmap(canvas: Canvas, bitmap: Bitmap, src: Rect?, dst: Rect)
     {
-            super.DrawBitmap(canvas, bitmap, src,
-                Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
+        val d = Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(),((dst.top - camera.look_at_y) * height_ratio).toInt()
+            ,((dst.right - camera.look_at_x) * width_ratio).toInt(),((dst.bottom - camera.look_at_y) * height_ratio).toInt())
+        canvas.drawBitmap(bitmap,src,d,paint)
+
+        /*
+        super.DrawBitmap(canvas, bitmap, src,
+                    Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
                     ((dst.right - camera.look_at_x) * width_ratio).toInt(), ((dst.bottom - camera.look_at_y) * height_ratio).toInt()))
+         */
     }
     override fun DrawBitmap(canvas: Canvas,bitmap: Bitmap,src: Rect?,dst: RectF)
     {
+        val d = RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
+            (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio)
+        canvas.drawBitmap(bitmap,src,d,paint)
+
+        /*
         super.DrawBitmap(canvas, bitmap, src,
                 RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
                     (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio))
+         */
     }
     override fun DrawBitmap(canvas: Canvas,bitmap:Bitmap,left:Float,top:Float) { canvas.drawBitmap(bitmap,left - camera.look_at_x,top - camera.look_at_y,paint) }
     /*
@@ -86,18 +99,34 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
     */
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, src: Rect?, dst: Rect)
     {
+        val bitmap:Bitmap = BitmapFactory.decodeFile(bitmap_path)
+        val d = Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
+            ((dst.right - camera.look_at_x) * width_ratio).toInt(), ((dst.bottom - camera.look_at_y) * height_ratio).toInt())
+        canvas.drawBitmap(bitmap,src,d,paint)
+        /*
         super.DrawBitmap(canvas, bitmap_path, src,
                 Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
                     ((dst.right - camera.look_at_x) * width_ratio).toInt(), ((dst.bottom - camera.look_at_y) * height_ratio).toInt()))
+         */
     }
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, src: Rect?, dst: RectF)
     {
+        val bitmap:Bitmap = BitmapFactory.decodeFile(bitmap_path)
+        val d = RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
+            (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio)
+        canvas.drawBitmap(bitmap,src,d,paint)
+        /*
         super.DrawBitmap(canvas,bitmap_path,src,
                 RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
                     (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio))
+         */
     }
     override fun DrawBitmap(canvas: Canvas,bitmap_path: String,left:Float,top:Float)
-    { super.DrawBitmap(canvas,bitmap_path,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio) }
+    {
+        val bitmap:Bitmap = BitmapFactory.decodeFile(bitmap_path)
+        canvas.drawBitmap(bitmap,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio,paint)
+        //super.DrawBitmap(canvas,bitmap_path,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio)
+    }
     /*
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, asset_manager: AssetManager, matrix: Matrix)
     {
@@ -107,23 +136,50 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
     */
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, asset_manager: AssetManager, src: Rect?, dst: Rect)
     {
+        val bitmap:Bitmap = BitmapFactory.decodeStream(asset_manager.open(bitmap_path))
+        val d = Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
+            ((dst.right - camera.look_at_x) * width_ratio).toInt(), ((dst.bottom - camera.look_at_y) * height_ratio).toInt())
+        canvas.drawBitmap(bitmap,src,d,paint)
+        /*
         super.DrawBitmap(canvas, bitmap_path, asset_manager, src,
                 Rect(((dst.left - camera.look_at_x) * width_ratio).toInt(), ((dst.top - camera.look_at_y) * height_ratio).toInt(),
                     ((dst.right - camera.look_at_x) * width_ratio).toInt(), ((dst.bottom - camera.look_at_y) * height_ratio).toInt()))
+         */
     }
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, asset_manager: AssetManager, src: Rect?, dst: RectF)
     {
+        val bitmap:Bitmap = BitmapFactory.decodeStream(asset_manager.open(bitmap_path))
+        val d = RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
+            (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio)
+        canvas.drawBitmap(bitmap,src,d,paint)
+        /*
         super.DrawBitmap(canvas, bitmap_path, asset_manager, src,
                 RectF((dst.left - camera.look_at_x) * width_ratio, (dst.top - camera.look_at_y) * height_ratio,
                     (dst.right - camera.look_at_x) * width_ratio, (dst.bottom - camera.look_at_y) * height_ratio))
+         */
     }
     override fun DrawBitmap(canvas: Canvas, bitmap_path: String, asset_manager: AssetManager, left:Float, top:Float)
-    { super.DrawBitmap(canvas, bitmap_path,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio) }
+    {
+        val bitmap:Bitmap = BitmapFactory.decodeFile(bitmap_path)
+        canvas.drawBitmap(bitmap,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio,paint)
+        //super.DrawBitmap(canvas, bitmap_path,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio)
+    }
 
     override fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float, y: Float, width:Float, height:Float, index:Int)
-    { super.DrawSprite(canvas,sprite,(x - camera.look_at_x) * width_ratio, (y - camera.look_at_y) * height_ratio, width * width_ratio, height * height_ratio, index) }
+    {
+        val dst:RectF = RectF((x - camera.look_at_x) * width_ratio,(y - camera.look_at_y) * height_ratio,
+            (x - camera.look_at_x) * width_ratio + width * width_ratio,(y - camera.look_at_y) * height_ratio + height * height_ratio)
+        sprite.GetBitmap()?.let { canvas.drawBitmap(it,sprite.GetSrcRect(index),dst,paint) }
+        /*
+        super.DrawSprite(canvas,sprite,(x - camera.look_at_x) * width_ratio, (y - camera.look_at_y) * height_ratio,
+            width * width_ratio, height * height_ratio, index)
+         */
+    }
     override fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float, y: Float, width:Float, height:Float, index:Int, flip_x:Float, flip_y: Float)
-    { super.DrawSprite(canvas,sprite,(x - camera.look_at_x) * width_ratio, (y - camera.look_at_y) * height_ratio, width * width_ratio, height * height_ratio, index, flip_x, flip_y) }
+    {
+        super.DrawSprite(canvas,sprite,(x - camera.look_at_x) * width_ratio, (y - camera.look_at_y) * height_ratio,
+            width * width_ratio, height * height_ratio, index, flip_x, flip_y)
+    }
 
     override fun DrawObject(canvas: Canvas, obj: Object, width: Float, height: Float, index: Int)
     {
@@ -141,7 +197,7 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
                 obj.GetCollisionBox()!!.SetRect(RectF(obj_x,obj_y,obj_x + obj_width,obj_y + obj_height))
                 if (!obj.GetCollisionBox()!!.Collision())
                 {
-                    val will_y = obj_y + obj.GetRigid()!!.GetDropHeight(render_time.toFloat())
+                    val will_y = obj_y + obj.GetRigid()!!.GetDropHeight(render_time)
                     obj.GetCollisionBox()!!.SetRect(RectF(obj_x,will_y,obj_x + obj_width,will_y + obj_height))
                     if (obj.GetCollisionBox()!!.Collision())
                     {
@@ -165,12 +221,12 @@ class SceneRenderer(private var camera: Camera = Camera()) : Renderer()
                                 return
                             }
                         }
-                        obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat()) / 100
+                        obj.y += obj.GetRigid()!!.GetDropHeight(render_time) / height_ratio
                     }
                 }
             }
             else
-                obj.y += obj.GetRigid()!!.GetDropHeight(render_time.toFloat()) / 100
+                obj.y += obj.GetRigid()!!.GetDropHeight(render_time) / height_ratio
         }
 
         obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }

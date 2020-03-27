@@ -7,41 +7,27 @@ import android.util.Log
 import android.widget.Toast
 import com.fly.graphic.Object
 import com.fly.graphic.Scene
-import com.fly.physics.CollisionBox
 
 val None = 0
 val WayLeft = -1
 val WayRight = 1
 
-class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManager? = null) : Object()
+class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManager? = null) : Object(scene)
 {
     var speed = 0.1f
 
     var way = WayRight
-    var run = None
+    var run = false
     var jump = false
     var drop = true
+    var attack = false
 
-    var skill_button_1 = false
-    var skill_button_2 = false
-    var skill_button_3 = false
-    var skill_button_4 = false
-    var skill_button_5 = false
-    var skill_button_6 = false
-    var skill_button_7 = false
-    var skill_button_8 = false
-    var skill_button_9 = false
-    var skill_button_10 = false
-    var skill_button_11 = false
-    var skill_button_12 = false
+    var skill_button:ArrayList<Boolean> = ArrayList<Boolean>()
 
     init
     {
-        if (scene != null)
-        {
-            width_ratio = scene.GetSceneWidthRatio()
-            height_ratio = scene.GetSceneHeightRatio()
-        }
+        for (i in 0 until 13)
+            skill_button.add(false)
         if (path != null && asset_manager != null)
             super.SetSprite(path,asset_manager,true,false)
     }
@@ -49,71 +35,69 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
     fun SetRun(way:Int,asset_manager: AssetManager)
     {
         this.way = way
-        run = way
+        run = true
 
         if (way == WayLeft)
-            SetSprite("player/Kakashi_Left.png",asset_manager,false,true)
+            SetSprite("player/KakashiLeft.png",asset_manager,false,true)
         else if (way == WayRight)
-            SetSprite("player/Kakashi_Right.png",asset_manager,false,true)
+            SetSprite("player/KakashiRight.png",asset_manager,false,true)
     }
 
     fun Run()
     {
         Log.e("Run","奔跑")
-        if (way == WayLeft)
-            x -= speed
-        if (way == WayRight)
-            x += speed
 
-        collision_box?.SetRect(RectF(x * width_ratio,y * height_ratio,(x + width) * width_ratio,(y + height)*height_ratio))!!
+        val will_x = if (way == WayLeft) x - speed else x + speed
+
+        collision_box?.SetRect(RectF(will_x * width_ratio,y * height_ratio,(will_x + width) * width_ratio,(y + height)*height_ratio))!!
         if(collision_box?.Collision()!!)
         {
             if ((y + height) * height_ratio > collision_box?.GetCollisionRect()?.top!!
                 && y * height_ratio < collision_box?.GetCollisionRect()?.bottom!!)
             {
                 Log.e("Run","碰撞")
-                if (way == WayLeft)
-                    x = collision_box?.GetCollisionRect()?.right!! / width_ratio + 1 / width_ratio
-                else if (way == WayRight)
-                    x = collision_box?.GetCollisionRect()?.left!! / width_ratio - width - 1 / width_ratio
+                x = x
+                y = y
+                return
             }
         }
+
+        if (way == WayLeft)
+            x -= speed
+        if (way == WayRight)
+            x += speed
     }
 
     fun Jump()
     {
         Log.e("Jump","跳跃")
+
+        val will_y = y - speed
+
+        collision_box?.SetRect(RectF(x * width_ratio,will_y * height_ratio,(x + width) * width_ratio,(will_y + height)*height_ratio))!!
+        if(collision_box?.Collision()!!)
+        {
+            if (will_y * height_ratio > collision_box?.GetCollisionRect()?.bottom!!)
+            {
+                Log.e("Run","碰撞")
+                y = y
+                return
+            }
+        }
+
+        y -= speed
     }
 
     fun Skill(context: Context)
     {
         Log.e("Skill","技能释放")
 
-        if (skill_button_1 && skill_button_5 && skill_button_9)
+        if (skill_button[1] && skill_button[5] && skill_button[9])
             Toast.makeText(context,"火球术",Toast.LENGTH_LONG).show()
 
-        skill_button_1 = false
-        skill_button_2 = false
-        skill_button_3 = false
-        skill_button_4 = false
-        skill_button_5 = false
-        skill_button_6 = false
-        skill_button_7 = false
-        skill_button_8 = false
-        skill_button_9 = false
-        skill_button_10 = false
-        skill_button_11 = false
-        skill_button_12 = false
+        for (i in 0 until 12)
+            skill_button[i] = false
     }
 
-    fun Drop()
-    {
-        if (collision_box!= null && collision_box!!.Collision())
-        {
-            if (y + height >= collision_box?.GetCollisionRect()?.top!!/height_ratio)
-                drop = false
-
-            Log.e("Drop",drop.toString())
-        }
-    }
+    fun Drop() { if (collision_box!= null && collision_box!!.Collision()) { drop = y + height < collision_box?.GetCollisionRect()?.top!!/height_ratio } }
 }

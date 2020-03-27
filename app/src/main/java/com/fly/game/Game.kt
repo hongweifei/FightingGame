@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.game.*
 class Game : Activity() , View.OnTouchListener
 {
     var camera: Camera = Camera(0f,0f)
-    var renderer : SceneRenderer = SceneRenderer(camera)
+    var renderer : SceneRenderer = SceneRenderer(null,camera)
 
     var width:Float = 0f
     var height:Float = 0f
@@ -56,8 +56,8 @@ class Game : Activity() , View.OnTouchListener
         //width = (width / density).toInt() // 屏幕宽度(dp)
         //height = (height / density).toInt() // 屏幕高度(dp)
 
-        width = 10f
-        height = 5f
+        width = 16f
+        height = 9f
 
         setContentView(R.layout.game)
         InitGame()
@@ -68,21 +68,29 @@ class Game : Activity() , View.OnTouchListener
     fun InitGame()
     {
         val wall = Object(scene)
-        wall.SetSprite("ui/RockerBackGround.png",assets)
+        wall.SetSprite("map/01.png",assets)
         wall.width = width
         wall.height = height / 6
         wall.y = height - wall.height
-        wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y + wall.height / 2,wall.x + wall.width,wall.y + wall.height / 2 + wall.height)))
+        wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y + wall.height / 2,wall.x + wall.width,wall.y + wall.height / 2)))
 
-        player = Player(scene,"player/Kakashi_Right.png",assets)
+        val wall2 = Object(scene)
+        wall2.SetSprite("map/01.png",assets)
+        wall2.width = width
+        wall2.height = height / 6
+        wall2.y = 0f
+        wall2.SetCollisionBox(CollisionBox(RectF(wall2.x,wall2.y,wall2.x + wall2.width,wall2.y + wall2.height)))
+
+        player = Player(scene,"player/KakashiRight.png",assets)
         player.width = width / 10
         player.height = height / 5
         player.x = width / 2 - player.width / 2
         player.y = 0f
         //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,9.8f))
+        player.SetRigidBody(RigidBody(0f,0.98f))
         player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
         player.AddCollide(wall)
+        player.AddCollide(wall2)
         player.InitSpriteSrcRect(0,0,80,80,10,7)
 
         scene.SetSceneRenderer(renderer)
@@ -91,13 +99,16 @@ class Game : Activity() , View.OnTouchListener
         //renderer.SetShader()
         renderer.SetDisplay {
             wall.Render(it,renderer)
-            if (player.way == WayLeft && player.run == None)
+            wall2.Render(it,renderer)
+            if (player.way == WayLeft && !player.run)
                 player.RenderObjectAnimation(it,renderer,6,9,4)
-            else if(player.way == WayRight && player.run == None)
+            else if(player.way == WayRight && !player.run)
                 player.RenderObjectAnimation(it,renderer,0,3,4)
             if (player.jump)
+            {
                 player.Jump()
-            if (player.run != None)
+            }
+            if (player.run)
             {
                 player.Run()
                 if (player.way == WayLeft)
@@ -105,10 +116,13 @@ class Game : Activity() , View.OnTouchListener
                 else if(player.way == WayRight)
                     player.RenderObjectAnimation(it,renderer,4,7,4)
             }
-            if (player.drop)
-                player.Drop()
 
-            //textView.text = "FPS:" + (1000 / renderer.GetRenderTime()).toString()
+            player.Drop()
+
+            Log.e("X", player.x.toString())
+            Log.e("Y",player.y.toString())
+
+            textView.text = "FPS:" + scene.GetFPS().toInt().toString()
         }
 
 
@@ -133,7 +147,7 @@ class Game : Activity() , View.OnTouchListener
                 camera.look_at_x += dx / 1000
                 camera.look_at_y += dy / 1000
 
-                Log.e("ViewMove","X:" + camera.look_at_x + "Y:" + camera.look_at_y)
+                Log.e("CameraMove","CameraX:" + camera.look_at_x + "CameraY:" + camera.look_at_y)
             }
         }
     }
@@ -143,46 +157,46 @@ class Game : Activity() , View.OnTouchListener
         val button_width:Float = (dm.widthPixels / 2 / 6).toFloat()
         val button_height:Float = (dm.heightPixels / 2 / 5).toFloat()
 
-        val skill_button:ImageButton = ImageButton("ui/RockerButton.png",assets,dm.widthPixels - button_width,dm.heightPixels.toFloat()/2,button_width,button_height)
-        val button_1:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,0 * button_height,button_width,button_height)
-        val button_2:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,0 * button_height,button_width,button_height)
-        val button_3:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,0 * button_height,button_width,button_height)
-        val button_4:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,0 * button_height,button_width,button_height)
-        val button_5:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,1 * button_height,button_width,button_height)
-        val button_6:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,1 * button_height,button_width,button_height)
-        val button_7:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,1 * button_height,button_width,button_height)
-        val button_8:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,1 * button_height,button_width,button_height)
-        val button_9:ImageButton = ImageButton("ui/RockerButton.png",assets,0 * button_width,2 * button_height,button_width,button_height)
-        val button_10:ImageButton = ImageButton("ui/RockerButton.png",assets,1 * button_width,2 * button_height,button_width,button_height)
-        val button_11:ImageButton = ImageButton("ui/RockerButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
-        val button_12:ImageButton = ImageButton("ui/RockerButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
+        val skill_button:ImageButton = ImageButton("ui/SkillButton.png",assets,dm.widthPixels - button_width,dm.heightPixels.toFloat()/2,button_width,button_height)
+        val button_1:ImageButton = ImageButton("ui/SkillButton.png",assets,0 * button_width,0 * button_height,button_width,button_height)
+        val button_2:ImageButton = ImageButton("ui/SkillButton.png",assets,1 * button_width,0 * button_height,button_width,button_height)
+        val button_3:ImageButton = ImageButton("ui/SkillButton.png",assets,2 * button_width,0 * button_height,button_width,button_height)
+        val button_4:ImageButton = ImageButton("ui/SkillButton.png",assets,3 * button_width,0 * button_height,button_width,button_height)
+        val button_5:ImageButton = ImageButton("ui/SkillButton.png",assets,0 * button_width,1 * button_height,button_width,button_height)
+        val button_6:ImageButton = ImageButton("ui/SkillButton.png",assets,1 * button_width,1 * button_height,button_width,button_height)
+        val button_7:ImageButton = ImageButton("ui/SkillButton.png",assets,2 * button_width,1 * button_height,button_width,button_height)
+        val button_8:ImageButton = ImageButton("ui/SkillButton.png",assets,3 * button_width,1 * button_height,button_width,button_height)
+        val button_9:ImageButton = ImageButton("ui/SkillButton.png",assets,0 * button_width,2 * button_height,button_width,button_height)
+        val button_10:ImageButton = ImageButton("ui/SkillButton.png",assets,1 * button_width,2 * button_height,button_width,button_height)
+        val button_11:ImageButton = ImageButton("ui/SkillButton.png",assets,2 * button_width,2 * button_height,button_width,button_height)
+        val button_12:ImageButton = ImageButton("ui/SkillButton.png",assets,3 * button_width,2 * button_height,button_width,button_height)
 
-        button_1.SetAlpha(40)
-        button_2.SetAlpha(40)
-        button_3.SetAlpha(40)
-        button_4.SetAlpha(40)
-        button_5.SetAlpha(40)
-        button_6.SetAlpha(40)
-        button_7.SetAlpha(40)
-        button_8.SetAlpha(40)
-        button_9.SetAlpha(40)
-        button_10.SetAlpha(40)
-        button_11.SetAlpha(40)
-        button_12.SetAlpha(40)
+        button_1.alpha = 40
+        button_2.alpha = 40
+        button_3.alpha = 40
+        button_4.alpha = 40
+        button_5.alpha = 40
+        button_6.alpha = 40
+        button_7.alpha = 40
+        button_8.alpha = 40
+        button_9.alpha = 40
+        button_10.alpha = 40
+        button_11.alpha = 40
+        button_12.alpha = 40
 
         skill_button.SetClick { player.Skill(this) }
-        button_1.SetClick { player.skill_button_1 = true;button_1.SetAlpha(255) }
-        button_2.SetClick { player.skill_button_2 = true;button_2.SetAlpha(255) }
-        button_3.SetClick { player.skill_button_3 = true }
-        button_4.SetClick { player.skill_button_4 = true }
-        button_5.SetClick { player.skill_button_5 = true }
-        button_6.SetClick { player.skill_button_6 = true }
-        button_7.SetClick { player.skill_button_7 = true }
-        button_8.SetClick { player.skill_button_8 = true }
-        button_9.SetClick { player.skill_button_9 = true }
-        button_10.SetClick { player.skill_button_10 = true }
-        button_11.SetClick { player.skill_button_11 = true }
-        button_12.SetClick { player.skill_button_12 = true }
+        button_1.SetClick { player.skill_button[1] = true;button_1.alpha = 255;Log.e("SkillButton1Alpha",button_1.alpha.toString()) }
+        button_2.SetClick { player.skill_button[2] = true;button_2.alpha = 255 }
+        button_3.SetClick { player.skill_button[3] = true }
+        button_4.SetClick { player.skill_button[4] = true }
+        button_5.SetClick { player.skill_button[5] = true }
+        button_6.SetClick { player.skill_button[6] = true }
+        button_7.SetClick { player.skill_button[7] = true }
+        button_8.SetClick { player.skill_button[8] = true }
+        button_9.SetClick { player.skill_button[9] = true }
+        button_10.SetClick { player.skill_button[10] = true }
+        button_11.SetClick { player.skill_button[11] = true }
+        button_12.SetClick { player.skill_button[12] = true }
 
         ui_view.AddWidget(skill_button)
         ui_view.AddWidget(button_1)
@@ -218,8 +232,8 @@ class Game : Activity() , View.OnTouchListener
             when(v?.id)
             {
                 R.id.JumpButton -> player.jump = false
-                R.id.LeftButton -> player.run = None
-                R.id.RightButton -> player.run = None
+                R.id.LeftButton -> player.run = false
+                R.id.RightButton -> player.run = false
             }
         }
 

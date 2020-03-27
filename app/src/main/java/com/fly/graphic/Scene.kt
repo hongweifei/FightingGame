@@ -6,6 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
 import android.util.DisplayMetrics
+import android.util.Log
+import android.view.Display
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -17,8 +19,6 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
     private var up:(event: MotionEvent?)->Unit = {}
     private var move:(event: MotionEvent?)->Unit = {}
 
-    private var FPS:Long? = null
-
     private var scene_renderer : SceneRenderer? = null
     private var bg_color : Int = Color.WHITE
 
@@ -26,6 +26,7 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
     private val dm = DisplayMetrics()
     protected var width_ratio:Float
     protected var height_ratio:Float
+    private var FPS:Float = wm.defaultDisplay.refreshRate
 
     protected var scene_width = 16f
     protected var scene_height = 9f
@@ -43,7 +44,9 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
     {
         super.onDraw(canvas)
 
-        val begin_time = System.currentTimeMillis() // the time when the cycle begun
+        FPS = wm.defaultDisplay.refreshRate
+
+        //val begin_time = System.currentTimeMillis() // the time when the cycle begun
 
         canvas?.drawColor(bg_color)
 
@@ -52,11 +55,11 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
         if(scene_renderer?.GetLayerType() != LAYER_TYPE_HARDWARE)
             setLayerType(LAYER_TYPE_SOFTWARE,scene_renderer?.GetPaint())
 
-        val diff_time:Long = System.currentTimeMillis() - begin_time // the time it took for the cycle to execute
-
+        //val diff_time:Long = System.currentTimeMillis() - begin_time // the time it took for the cycle to execute
+/*
         if(diff_time > 0)
             FPS = 1000 / diff_time
-
+*/
         //Log.e("FPS",FPS.toString())
 
         postInvalidate()
@@ -75,7 +78,7 @@ class Scene(context : Context?,attrs:AttributeSet?) : View(context,attrs)
         return true
     }
 
-    fun GetFPS() : Long? { return FPS }
+    fun GetFPS() : Float { return wm.defaultDisplay.refreshRate }
 
     fun GetSceneWidth() : Float { return scene_width }
     fun GetSceneHeight() : Float { return scene_height }

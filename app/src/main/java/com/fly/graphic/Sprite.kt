@@ -2,7 +2,6 @@ package com.fly.graphic
 
 import android.content.res.AssetManager
 import android.graphics.*
-import androidx.core.graphics.toRect
 
 open class Sprite(path:String? = null, asset_manager: AssetManager? = null)
 {

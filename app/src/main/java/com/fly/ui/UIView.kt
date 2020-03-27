@@ -3,6 +3,7 @@ package com.fly.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.provider.ContactsContract
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -31,20 +32,9 @@ class UIView(context : Context?,attrs: AttributeSet?) : View(context,attrs)
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean
     {
-        if (event?.action == MotionEvent.ACTION_DOWN)
-        {
-            click(event)
-            WidgetClick(event)
-        }
-        if (event?.action == MotionEvent.ACTION_UP)
-        {
-            up(event)
-            WidgetUp()
-        }
-        if (event?.action == MotionEvent.ACTION_MOVE)
-        {
-            move(event)
-        }
+        if (event?.action == MotionEvent.ACTION_DOWN) { click(event);WidgetClick(event) }
+        if (event?.action == MotionEvent.ACTION_UP) { up(event);WidgetUp(event) }
+        if (event?.action == MotionEvent.ACTION_MOVE) { move(event);WidgetMove(event) }
 
         return true
     }
@@ -65,43 +55,29 @@ class UIView(context : Context?,attrs: AttributeSet?) : View(context,attrs)
     fun AddWidget(widget:Widget) { widget_list.add(widget) }
     fun AddWidgets(widgets: ArrayList<Widget>) { widget_list.addAll(widgets) }
 
-    fun FindWidget(x:Float,y:Float) : ArrayList<Int>
+    fun WidgetClick(event: MotionEvent)
     {
-        val index : ArrayList<Int> = ArrayList<Int>()
         for (i in 0 until widget_list.size)
         {
             if (Collision(widget_list[i].x,widget_list[i].y,widget_list[i].width,widget_list[i].height,
-                    x,y,1f,1f))
-            {
-                index.add(i)
-            }
-        }
-        return index
-    }
-
-    fun WidgetClick(event: MotionEvent)
-    {
-        val index = FindWidget(event.x,event.y)
-        for (i in 0 until index.size)
-        {
-            widget_list[index[i]].is_up = false
-
-            widget_list[index[i]].is_click = true
-            widget_list[index[i]].Click()
+                    event.x,event.y,1f,1f))
+                widget_list[i].Click(event)
         }
     }
-
-    fun WidgetUp()
+    fun WidgetUp(event:MotionEvent)
     {
         for (i in 0 until widget_list.size)
         {
-            if (widget_list[i].is_click)
-            {
-                widget_list[i].is_click = false
-
-                widget_list[i].is_up = true
-                widget_list[i].Up()
-            }
+            if (Collision(widget_list[i].x,widget_list[i].y,widget_list[i].width,widget_list[i].height, event.x,event.y,1f,1f))
+                widget_list[i].Up(event)
+        }
+    }
+    fun WidgetMove(event:MotionEvent)
+    {
+        for (i in 0 until widget_list.size)
+        {
+            if (Collision(widget_list[i].x,widget_list[i].y,widget_list[i].width,widget_list[i].height, event.x,event.y,1f,1f))
+                widget_list[i].Move(event)
         }
     }
 

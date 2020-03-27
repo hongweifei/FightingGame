@@ -18,17 +18,17 @@ class ImageButton(path:String?,asset_manager:AssetManager?,x:Float = 0f, y:Float
 
     override fun Render(canvas: Canvas, renderer: Renderer)
     {
-        renderer.SetAlpha(alpha)
-        renderer.DrawBitmap(canvas,bitmap,null, RectF(x,y,x + width,y + height))
+        Render(canvas, renderer, x, y)
     }
     override fun Render(canvas: Canvas, renderer: Renderer, x: Float, y: Float)
     {
-        renderer.SetAlpha(alpha)
-        renderer.DrawBitmap(canvas,bitmap,null,RectF(x,y,x + width,y + height))
+        Render(canvas, renderer, x, y, width, height)
     }
     override fun Render(canvas: Canvas, renderer: Renderer, x: Float, y: Float, width: Float, height: Float)
     {
         renderer.SetAlpha(alpha)
         renderer.DrawBitmap(canvas,bitmap,null,RectF(x,y,x + width,y + height))
     }
+
+
 }

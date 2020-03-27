@@ -4,6 +4,7 @@ import android.content.res.AssetManager
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.RectF
+import android.view.MotionEvent
 import com.fly.animation.Animation
 import com.fly.animation.Animator
 import com.fly.physics.CollisionBox
@@ -14,8 +15,12 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
     var width:Float = 0f
     var height:Float = 0f
 
-    protected var width_ratio:Float = 1f
-    protected var height_ratio:Float = 1f
+    protected var width_ratio:Float = scene?.GetSceneWidthRatio() ?: 1f
+    protected var height_ratio:Float = scene?.GetSceneHeightRatio() ?: 1f
+
+    private var click : (event: MotionEvent?) -> Unit = {}
+    private var up : (event: MotionEvent?) -> Unit = {}
+    private var move:(event: MotionEvent?)->Unit = {}
 
     private var render_animation = false
     private var render_n:Int = 0
@@ -28,14 +33,12 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
     protected var rigid_body: RigidBody? = null
     protected var collision_box:CollisionBox? = null
 
-    init
-    {
-        if (scene != null)
-        {
-            width_ratio = scene.GetSceneWidthRatio()
-            height_ratio = scene.GetSceneHeightRatio()
-        }
-    }
+    fun SetClick(click:(event: MotionEvent?) ->Unit) { this.click = click }
+    fun Click(event: MotionEvent?) { click(event) }
+    fun SetUp(up:(event: MotionEvent?) ->Unit) { this.up = up }
+    fun Up(event: MotionEvent?) { up(event) }
+    fun SetMove(move:(event: MotionEvent?) ->Unit) { this.move = move }
+    fun Move(event: MotionEvent?) { move(event) }
 
     fun SetSprite(sprite: Sprite,init_w_h:Boolean = true,sprite_rect_continue:Boolean = false)
     {
