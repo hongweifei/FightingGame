@@ -34,7 +34,8 @@ class Game : Activity() , View.OnTouchListener
 
     val dm = DisplayMetrics()
 
-    lateinit var player:Player
+    lateinit var player1:Player
+    lateinit var player2:Player
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?)
@@ -83,20 +84,36 @@ class Game : Activity() , View.OnTouchListener
         wall2.SetCollisionBox(CollisionBox(RectF(wall2.x,wall2.y,wall2.x + wall2.width,wall2.y + wall2.height)))
         */
 
-        player = Player(scene,"player/KakashiRight.png",assets)
-        player.width = width / 10
-        player.height = height / 5
-        player.x = width / 2 - player.width / 2
-        player.y = 1f
-        //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,9.8f))
-        player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
-        player.AddCollide(wall)
-        //player.AddCollide(RectF(0f,0f,0.1f,height))
-        //player.AddCollide(RectF(0f,0f,width,0.1f))
-        //player.AddCollide(RectF(width,0f,width + 0.1f,height))
-        //player.AddCollide(wall2)
-        player.InitSpriteSrcRect(0,0,80,80,10,7)
+        player1 = Player(scene,"player/KakashiRight.png",assets)
+        player1.width = width / 10
+        player1.height = height / 5
+        player1.x = width / 2 - player1.width / 2
+        player1.y = 1f
+        //player1.SetSprite()
+        player1.SetRigidBody(RigidBody(0f,9.8f))
+        player1.SetCollisionBox(CollisionBox(RectF(player1.x,player1.y,player1.x + player1.width,player1.y + player1.height)))
+        player1.AddCollide(wall)
+        //player1.AddCollide(RectF(0f,0f,0.1f,height))
+        //player1.AddCollide(RectF(0f,0f,width,0.1f))
+        //player1.AddCollide(RectF(width,0f,width + 0.1f,height))
+        //player1.AddCollide(wall2)
+        player1.InitSpriteSrcRect(0,0,80,80,10,7)
+
+
+        player2 = Player(scene,"player/KakashiRight.png",assets)
+        player2.width = width / 10
+        player2.height = height / 5
+        player2.x = width / 2 - player2.width / 2
+        player2.y = 1f
+        //player2.SetSprite()
+        player2.SetRigidBody(RigidBody(0f,9.8f))
+        player2.SetCollisionBox(CollisionBox(RectF(player2.x,player2.y,player2.x + player2.width,player2.y + player2.height)))
+        player2.AddCollide(wall)
+        //player2.AddCollide(RectF(0f,0f,0.1f,height))
+        //player2.AddCollide(RectF(0f,0f,width,0.1f))
+        //player2.AddCollide(RectF(width,0f,width + 0.1f,height))
+        //player2.AddCollide(wall2)
+        player2.InitSpriteSrcRect(0,0,80,80,10,7)
 
         scene.SetSceneRenderer(renderer)
         scene.SetCamera(camera)
@@ -105,25 +122,52 @@ class Game : Activity() , View.OnTouchListener
         renderer.SetDisplay {
             wall.Render(it,renderer)
             //wall2.Render(it,renderer)
-            if (player.way == WayLeft && !player.run)
-                player.RenderObjectAnimation(it,renderer,6,9,4)
-            else if(player.way == WayRight && !player.run)
-                player.RenderObjectAnimation(it,renderer,0,3,4)
-            if (player.jump)
-                player.Jump()
-            if (player.run)
+            if (player1.way == WayLeft && !player1.run)
+                player1.RenderObjectAnimation(it,renderer,6,9,4)
+            else if(player1.way == WayRight && !player1.run)
+                player1.RenderObjectAnimation(it,renderer,0,3,4)
+            if (player1.jump)
+                player1.Jump()
+            if (player1.run)
             {
-                player.Run()
-                if (player.way == WayLeft)
-                    player.RenderObjectAnimation(it,renderer,2,5,4)
-                else if(player.way == WayRight)
-                    player.RenderObjectAnimation(it,renderer,4,7,4)
+                player1.Run()
+                if (player1.way == WayLeft)
+                    player1.RenderObjectAnimation(it,renderer,2,5,4)
+                else if(player1.way == WayRight)
+                    player1.RenderObjectAnimation(it,renderer,4,7,4)
             }
 
-            player.Drop()
+            player1.Drop()
 
-            Log.e("X", player.x.toString())
-            Log.e("Y",player.y.toString())
+            if(player1.attack)
+            {
+                player1.Attack()
+            }
+
+            if (player2.way == WayLeft && !player2.run)
+                player2.RenderObjectAnimation(it,renderer,6,9,4)
+            else if(player2.way == WayRight && !player2.run)
+                player2.RenderObjectAnimation(it,renderer,0,3,4)
+            if (player2.jump)
+                player2.Jump()
+            if (player2.run)
+            {
+                player2.Run()
+                if (player2.way == WayLeft)
+                    player2.RenderObjectAnimation(it,renderer,2,5,4)
+                else if(player2.way == WayRight)
+                    player2.RenderObjectAnimation(it,renderer,4,7,4)
+            }
+
+            player2.Drop()
+
+            if(player2.attack)
+            {
+                player2.Attack()
+            }
+
+            Log.e("X", player1.x.toString())
+            Log.e("Y",player1.y.toString())
 
             textView.text = "FPS:" + scene.GetFPS().toInt().toString()
         }
@@ -187,19 +231,19 @@ class Game : Activity() , View.OnTouchListener
         button_11.alpha = 40
         button_12.alpha = 40
 
-        skill_button.SetClick { player.Skill(this) }
-        button_1.SetClick { player.skill_button[1] = true;button_1.alpha = 255;Log.e("SkillButton1Alpha",button_1.alpha.toString()) }
-        button_2.SetClick { player.skill_button[2] = true;button_2.alpha = 255 }
-        button_3.SetClick { player.skill_button[3] = true }
-        button_4.SetClick { player.skill_button[4] = true }
-        button_5.SetClick { player.skill_button[5] = true }
-        button_6.SetClick { player.skill_button[6] = true }
-        button_7.SetClick { player.skill_button[7] = true }
-        button_8.SetClick { player.skill_button[8] = true }
-        button_9.SetClick { player.skill_button[9] = true }
-        button_10.SetClick { player.skill_button[10] = true }
-        button_11.SetClick { player.skill_button[11] = true }
-        button_12.SetClick { player.skill_button[12] = true }
+        skill_button.SetClick { player1.Skill(this) }
+        button_1.SetClick { player1.skill_button[1] = true;button_1.alpha = 255;Log.e("SkillButton1Alpha",button_1.alpha.toString()) }
+        button_2.SetClick { player1.skill_button[2] = true;button_2.alpha = 255 }
+        button_3.SetClick { player1.skill_button[3] = true }
+        button_4.SetClick { player1.skill_button[4] = true }
+        button_5.SetClick { player1.skill_button[5] = true }
+        button_6.SetClick { player1.skill_button[6] = true }
+        button_7.SetClick { player1.skill_button[7] = true }
+        button_8.SetClick { player1.skill_button[8] = true }
+        button_9.SetClick { player1.skill_button[9] = true }
+        button_10.SetClick { player1.skill_button[10] = true }
+        button_11.SetClick { player1.skill_button[11] = true }
+        button_12.SetClick { player1.skill_button[12] = true }
 
         ui_view.AddWidget(skill_button)
         ui_view.AddWidget(button_1)
@@ -225,18 +269,18 @@ class Game : Activity() , View.OnTouchListener
             touch_y = event.rawY
             when (v?.id)
             {
-                R.id.JumpButton -> player.jump = true
-                R.id.LeftButton -> player.SetRun(WayLeft,assets)
-                R.id.RightButton -> player.SetRun(WayRight,assets)
+                R.id.JumpButton -> player1.jump = true
+                R.id.LeftButton -> player1.SetRun(WayLeft,assets)
+                R.id.RightButton -> player1.SetRun(WayRight,assets)
             }
         }
         if (event?.action == MotionEvent.ACTION_UP)
         {
             when(v?.id)
             {
-                R.id.JumpButton -> player.jump = false
-                R.id.LeftButton -> player.run = false
-                R.id.RightButton -> player.run = false
+                R.id.JumpButton -> player1.jump = false
+                R.id.LeftButton -> player1.run = false
+                R.id.RightButton -> player1.run = false
             }
         }
 

@@ -108,9 +108,9 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
         {
             for(i in 0 until collision_box!!.GetAllCollideRect().size)
             {
-                drop = !(y + height >= collision_box!!.GetCollideRect(i).bottom / height_ratio
-                        && x <= collision_box!!.GetCollideRect(i).right / width_ratio
-                        && x + width >= collision_box!!.GetCollideRect(i).left / width_ratio)
+                drop = !(y + height >= collision_box!!.GetCollideRect(0).bottom / height_ratio
+                        && x <= collision_box!!.GetCollideRect(0).right / width_ratio
+                        && x + width >= collision_box!!.GetCollideRect(0).left / width_ratio)
             }
             if (!drop)
             {
@@ -163,6 +163,15 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
         next_y = null
 
         Log.e("drop",drop.toString())
+    }
+
+    fun Attack()
+    {
+        collision_box?.SetRect(RectF(x * width_ratio,y * height_ratio,(x + width) * width_ratio,(y + height)*height_ratio))!!
+        if(collision_box!!.Collision())
+        {
+
+        }
     }
 
     fun Skill(context: Context)
