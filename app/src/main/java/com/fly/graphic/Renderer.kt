@@ -39,8 +39,6 @@ open class Renderer()
         val begin_time = System.currentTimeMillis();
         render(canvas);
         render_time = System.currentTimeMillis() - begin_time
-        if (render_time <= 0)
-            render_time++
     }
 
     fun SetStrokeWidth(stroke_width:Float) { paint.strokeWidth = stroke_width }
@@ -141,8 +139,9 @@ open class Renderer()
 
     open fun DrawObject(canvas: Canvas, obj: Object, width: Float = obj.width, height: Float = obj.height, index: Int = 0)
     {
-        obj_last_x = obj.x
-        obj_last_y = obj.y
+        //obj_last_x = obj.x
+        //obj_last_y = obj.y
+        /*
         if (obj.GetRigid() != null)
         {
             if (obj.GetCollisionBox() != null)
@@ -180,11 +179,13 @@ open class Renderer()
             else
                 obj.y += obj.GetRigid()!!.GetDropHeight(render_time)
         }
-
+        */
         obj.GetSprite()?.let { DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        /*
         if (obj_next_y != null)
             obj.y = obj_next_y!!
         obj_next_y = null
+        */
     }
 
 }

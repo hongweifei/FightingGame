@@ -74,23 +74,28 @@ class Game : Activity() , View.OnTouchListener
         wall.y = height - wall.height
         wall.SetCollisionBox(CollisionBox(RectF(wall.x,wall.y + wall.height / 2,wall.x + wall.width,wall.y + wall.height / 2)))
 
+        /*
         val wall2 = Object(scene)
         wall2.SetSprite("map/01.png",assets)
         wall2.width = width
         wall2.height = height / 6
         wall2.y = 0f
         wall2.SetCollisionBox(CollisionBox(RectF(wall2.x,wall2.y,wall2.x + wall2.width,wall2.y + wall2.height)))
+        */
 
         player = Player(scene,"player/KakashiRight.png",assets)
         player.width = width / 10
         player.height = height / 5
         player.x = width / 2 - player.width / 2
-        player.y = 0f
+        player.y = 1f
         //player.SetSprite()
-        player.SetRigidBody(RigidBody(0f,0.98f))
+        player.SetRigidBody(RigidBody(0f,9.8f))
         player.SetCollisionBox(CollisionBox(RectF(player.x,player.y,player.x + player.width,player.y + player.height)))
         player.AddCollide(wall)
-        player.AddCollide(wall2)
+        //player.AddCollide(RectF(0f,0f,0.1f,height))
+        //player.AddCollide(RectF(0f,0f,width,0.1f))
+        //player.AddCollide(RectF(width,0f,width + 0.1f,height))
+        //player.AddCollide(wall2)
         player.InitSpriteSrcRect(0,0,80,80,10,7)
 
         scene.SetSceneRenderer(renderer)
@@ -99,15 +104,13 @@ class Game : Activity() , View.OnTouchListener
         //renderer.SetShader()
         renderer.SetDisplay {
             wall.Render(it,renderer)
-            wall2.Render(it,renderer)
+            //wall2.Render(it,renderer)
             if (player.way == WayLeft && !player.run)
                 player.RenderObjectAnimation(it,renderer,6,9,4)
             else if(player.way == WayRight && !player.run)
                 player.RenderObjectAnimation(it,renderer,0,3,4)
             if (player.jump)
-            {
                 player.Jump()
-            }
             if (player.run)
             {
                 player.Run()

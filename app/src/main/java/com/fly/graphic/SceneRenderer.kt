@@ -183,6 +183,7 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
 
     override fun DrawObject(canvas: Canvas, obj: Object, width: Float, height: Float, index: Int)
     {
+        /*
         val obj_x = obj.x * width_ratio
         val obj_y = obj.y * height_ratio
         val obj_width = width * width_ratio
@@ -228,11 +229,13 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
             else
                 obj.y += obj.GetRigid()!!.GetDropHeight(render_time) / height_ratio
         }
-
+        */
         obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        /*
         if (obj_next_y != null)
             obj.y = obj_next_y!!
         obj_next_y = null
+        */
     }
 
 }

@@ -16,11 +16,21 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
 {
     var speed = 0.1f
 
+    var last_x = x * width_ratio
+    var last_y = y * height_ratio
+    var next_y:Float? = null
+
     var way = WayRight
     var run = false
     var jump = false
     var drop = true
     var attack = false
+
+    val jump_height = 3f
+    var jump_first_height = y
+
+    var drop_start = false
+    var drop_start_time = System.currentTimeMillis()
 
     var skill_button:ArrayList<Boolean> = ArrayList<Boolean>()
 
@@ -52,14 +62,16 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
         collision_box?.SetRect(RectF(will_x * width_ratio,y * height_ratio,(will_x + width) * width_ratio,(y + height)*height_ratio))!!
         if(collision_box?.Collision()!!)
         {
-            if ((y + height) * height_ratio > collision_box?.GetCollisionRect()?.top!!
-                && y * height_ratio < collision_box?.GetCollisionRect()?.bottom!!)
+            for (i in 0 until collision_box?.GetAllCollideRect()?.size!!)
             {
-                Log.e("Run","碰撞")
-                x = x
-                y = y
-                return
+                if ((y + height) * height_ratio > collision_box?.GetCollideRect(i)?.top!!
+                    && y * height_ratio < collision_box?.GetCollideRect(i)?.bottom!!)
+                {
+                    Log.e("Run","碰撞")
+                    return
+                }
             }
+
         }
 
         if (way == WayLeft)
@@ -72,20 +84,85 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
     {
         Log.e("Jump","跳跃")
 
-        val will_y = y - speed
-
-        collision_box?.SetRect(RectF(x * width_ratio,will_y * height_ratio,(x + width) * width_ratio,(will_y + height)*height_ratio))!!
-        if(collision_box?.Collision()!!)
+        if (y > jump_first_height - jump_height)
+            y -= speed
+        else if (y < jump_first_height - jump_height)
         {
-            if (will_y * height_ratio > collision_box?.GetCollisionRect()?.bottom!!)
+            jump = false
+            drop = true
+        }
+        collision_box?.SetRect(RectF(x * width_ratio,y * height_ratio,(x + width) * width_ratio,(y + height)*height_ratio))!!
+    }
+
+    fun Drop()
+    {
+        val obj_x = x * width_ratio
+        val obj_y = y * height_ratio
+        val obj_width = width * width_ratio
+        val obj_height = height * height_ratio
+        last_x = obj_x
+        last_y = obj_y
+
+        collision_box?.SetRect(RectF(x * width_ratio,y * height_ratio,(x + width) * width_ratio,(y + height)*height_ratio))!!
+        if (rigid_body != null && collision_box!= null && collision_box!!.Collision())
+        {
+            for(i in 0 until collision_box!!.GetAllCollideRect().size)
             {
-                Log.e("Run","碰撞")
-                y = y
-                return
+                drop = !(y + height >= collision_box!!.GetCollideRect(i).bottom / height_ratio
+                        && x <= collision_box!!.GetCollideRect(i).right / width_ratio
+                        && x + width >= collision_box!!.GetCollideRect(i).left / width_ratio)
+            }
+            if (!drop)
+            {
+                jump_first_height = y
+                drop_start = false
+            }
+        }
+        else if (rigid_body != null && collision_box!= null && !collision_box!!.Collision())
+            drop = true
+
+        if (rigid_body != null && drop && !drop_start)
+        {
+            drop_start_time = System.currentTimeMillis()
+            drop_start = true
+        }
+
+        if (rigid_body != null && drop)
+        {
+            val will_y = obj_y + GetRigid()!!.GetDropHeight(System.currentTimeMillis() - drop_start_time)
+            GetCollisionBox()!!.SetRect(RectF(obj_x,will_y,obj_x + obj_width,will_y + obj_height))
+            if (GetCollisionBox()!!.Collision())
+            {
+                for (i in 0 until collision_box?.GetAllCollideRect()?.size!!)
+                {
+                    if (will_y + obj_height > GetCollisionBox()!!.GetCollideRect(i).top)//下一次底大于物体的顶
+                    {
+                        next_y = GetCollisionBox()!!.GetCollideRect(i).top / height_ratio - height //将下一次的底改为物体的顶
+                        drop = false
+                    }
+                }
+            }
+            else
+            {
+                for (i in 0 until GetCollisionBox()!!.GetAllCollisionRect().size)
+                {
+                    if (obj_y >= GetCollisionBox()!!.GetAllCollisionRect()[i].bottom // ||  obj_y > obj.GetCollisionBox()!!.GetAllCollisionRect()[i].top
+                        && last_y + obj_height < GetCollisionBox()!!.GetAllCollisionRect()[i].top)
+                    {
+                        y = GetCollisionBox()!!.GetAllCollisionRect()[i].top / height_ratio - height
+                        drop = false
+                        return
+                    }
+                }
+                y += GetRigid()!!.GetDropHeight(System.currentTimeMillis() - drop_start_time) / height_ratio
             }
         }
 
-        y -= speed
+        if (next_y != null)
+            y = next_y!!
+        next_y = null
+
+        Log.e("drop",drop.toString())
     }
 
     fun Skill(context: Context)
@@ -99,5 +176,4 @@ class Player(scene: Scene? = null,path: String? = null,asset_manager: AssetManag
             skill_button[i] = false
     }
 
-    fun Drop() { if (collision_box!= null && collision_box!!.Collision()) { drop = y + height < collision_box?.GetCollisionRect()?.top!!/height_ratio } }
 }

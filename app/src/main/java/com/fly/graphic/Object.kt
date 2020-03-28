@@ -79,8 +79,18 @@ open class Object(scene: Scene? = null,var x:Float = 0f, var y:Float = 0f)
 
     fun AddAnimation(animation: Animation) { animator?.AddAnimation(animation) }
 
-    fun AddCollide(r:RectF) { collision_box?.AddCollide(r) }
-    fun AddCollide(collision_box: CollisionBox) { this.collision_box?.AddCollide(collision_box) }
+    fun AddCollide(r:RectF)
+    {
+        val rect = RectF(r.left * width_ratio,r.top * height_ratio,r.right * width_ratio,r.bottom * height_ratio)
+        collision_box?.AddCollide(rect)
+    }
+    fun AddCollide(collision_box: CollisionBox)
+    {
+        val box:CollisionBox = collision_box
+        if (box.rect != null)
+            box.rect = RectF(box.rect!!.left * width_ratio,box.rect!!.top * height_ratio, box.rect!!.right * width_ratio,box.rect!!.bottom * height_ratio)
+        this.collision_box?.AddCollide(box)
+    }
     fun AddCollide(obj:Object) { collision_box?.AddCollide(obj.collision_box!!) }
 
     fun InitSrcRect(rect_list:ArrayList<Rect>) { sprite?.GetSrcRect()?.clear();sprite?.SetSrcRect(rect_list) }
