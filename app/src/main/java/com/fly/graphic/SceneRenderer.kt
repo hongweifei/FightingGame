@@ -4,16 +4,20 @@ import android.content.res.AssetManager
 import android.graphics.*
 import android.util.Log
 
-class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) : Renderer()
+class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) : Renderer()//场景渲染器，继承渲染器
 {
+    /*场景宽高比*/
     private var width_ratio = scene?.GetSceneWidthRatio() ?: 1f
     private var height_ratio = scene?.GetSceneHeightRatio() ?: 1f
 
+    /*设置场景宽高比及摄像机*/
     fun SetWidthRatio(width_ratio:Float){ this.width_ratio = width_ratio }
     fun SetHeightRatio(height_ratio:Float){ this.height_ratio = height_ratio }
     fun SetCamera(camera: Camera) { this.camera = camera }
+    /*获取摄像机*/
     fun GetCamera() : Camera { return camera }
 
+    /*场景渲染器绘制方法，绘制坐标皆与摄像机坐标相关*/
     override fun DrawPoint(canvas: Canvas, x:Float, y:Float){ canvas.drawPoint((x - camera.look_at_x) * width_ratio,(y - camera.look_at_y) * height_ratio,paint) }
     override fun DrawPoints(canvas: Canvas, pts:FloatArray)
     {
@@ -62,8 +66,10 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
         }
     }
 
+    /*绘制文本*/
     override fun DrawText(canvas: Canvas, text:String, x:Float, y:Float) { canvas.drawText(text,x - camera.look_at_x,y - camera.look_at_y,paint) }
 
+    /*绘图方法*/
     //override fun DrawBitmap(canvas: Canvas, bitmap: Bitmap, matrix: Matrix) { canvas.drawBitmap(bitmap,matrix,super.GetPaint()) }
     override fun DrawBitmap(canvas: Canvas, bitmap: Bitmap, src: Rect?, dst: Rect)
     {
@@ -165,11 +171,12 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
         //super.DrawBitmap(canvas, bitmap_path,(left - camera.look_at_x) * width_ratio,(top - camera.look_at_y) * height_ratio)
     }
 
+    /*绘制精灵*/
     override fun DrawSprite(canvas: Canvas, sprite:Sprite, x:Float, y: Float, width:Float, height:Float, index:Int)
     {
         val dst:RectF = RectF((x - camera.look_at_x) * width_ratio,(y - camera.look_at_y) * height_ratio,
             (x - camera.look_at_x) * width_ratio + width * width_ratio,(y - camera.look_at_y) * height_ratio + height * height_ratio)
-        sprite.GetBitmap()?.let { canvas.drawBitmap(it,sprite.GetSrcRect(index),dst,paint) }
+        sprite.GetBitmap()?.let { canvas.drawBitmap(it,sprite.GetSrcRect(index),dst,paint) }//绘制精灵bitmap
         /*
         super.DrawSprite(canvas,sprite,(x - camera.look_at_x) * width_ratio, (y - camera.look_at_y) * height_ratio,
             width * width_ratio, height * height_ratio, index)
@@ -181,6 +188,7 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
             width * width_ratio, height * height_ratio, index, flip_x, flip_y)
     }
 
+    /*绘制物体*/
     override fun DrawObject(canvas: Canvas, obj: Object, width: Float, height: Float, index: Int)
     {
         /*
@@ -230,7 +238,7 @@ class SceneRenderer(scene: Scene? = null,private var camera: Camera = Camera()) 
                 obj.y += obj.GetRigid()!!.GetDropHeight(render_time) / height_ratio
         }
         */
-        obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }
+        obj.GetSprite()?.let{ DrawSprite(canvas, it,obj.x,obj.y,width,height,index) }//绘制物体精灵
         /*
         if (obj_next_y != null)
             obj.y = obj_next_y!!
