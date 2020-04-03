@@ -169,7 +169,7 @@ class Game : Activity() , View.OnTouchListener
             Log.e("X", player1.x.toString())
             Log.e("Y",player1.y.toString())
 
-            textView.text = "FPS:" + scene.GetFPS().toInt().toString()
+            
         }
 
 
